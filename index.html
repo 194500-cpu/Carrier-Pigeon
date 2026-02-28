@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pigeon Messenger</title>
+    <title>Pigeon Messenger/title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary: #3ecf8e; --user-msg: #3b82f6; --bg: #0b0e11; --card: #1c2127; --input: #2d333b; --border: #444c56; --text: #adbac7; --header: #ffffff; }
@@ -25,13 +25,14 @@
         .nav-item.active-nav { opacity: 1; color: var(--primary); }
 
         #output { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 10px 0; }
+        .date-divider { align-self: center; font-size: 11px; font-weight: 700; opacity: 0.5; margin: 15px 0; background: var(--input); padding: 4px 12px; border-radius: 10px; text-transform: uppercase; }
         .msg { padding: 12px 16px; border-radius: 20px; max-width: 85%; font-size: 15px; position: relative; cursor: pointer; }
         .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 4px; }
         .msg-other { align-self: flex-start; background: var(--input); color: var(--header); border-bottom-left-radius: 4px; cursor: default; }
-        .time { font-size: 9px; opacity: 0.5; margin-top: 4px; display: block; text-align: right; }
-        .msg-sys { align-self: center; font-size: 11px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px; }
+        .time { font-size: 9px; opacity: 0.6; margin-top: 4px; display: block; text-align: right; }
+        .msg-sys { align-self: center; font-size: 11px; opacity: 0.4; }
 
-        #admin-sheet, #chat-settings-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; height: auto; max-height: 80%; background: var(--card); border-radius: 30px 30px 0 0; border-top: 1px solid var(--border); z-index: 100; padding: 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 -10px 40px rgba(0,0,0,0.4); }
+        #chat-settings-sheet, #admin-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; height: auto; background: var(--card); border-radius: 30px 30px 0 0; border-top: 1px solid var(--border); z-index: 100; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
         .open { bottom: 0 !important; }
     </style>
 </head>
@@ -39,7 +40,7 @@
 
 <div class="container">
     <div id="login-screen" class="screen active" style="justify-content:center; gap:15px;">
-        <h1 style="text-align:center; color:var(--header);">Log in/Sign up</h1>
+        <h1 style="text-align:center; color:var(--header);">Welcome</h1>
         <input type="text" id="login-user" placeholder="Username">
         <input type="password" id="login-pass" placeholder="Password">
         <button onclick="handleAuth('login')">Sign In</button>
@@ -57,7 +58,7 @@
     <div id="home-screen" class="screen">
         <h2 style="color:var(--header); margin-top:0;">Messages</h2>
         <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <input type="text" id="new-chat-user" placeholder="Username...">
+            <input type="text" id="new-chat-user" placeholder="Contact username...">
             <button onclick="startNewChat()" style="width:60px;">+</button>
         </div>
         <div id="chat-list" style="overflow-y:auto; flex:1;"></div>
@@ -76,7 +77,7 @@
     <div id="chat-window" class="screen" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:50; background:var(--card);">
         <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:15px; border-bottom:1px solid var(--border);">
             <button onclick="closeChatWindow()" style="background:none; color:var(--text); border:none; font-size:20px;">←</button>
-            <div style="text-align:center"><b id="chat-title" style="color:var(--header);">Chat</b></div>
+            <b id="chat-title" style="color:var(--header);">Chat</b>
             <button onclick="toggleChatSettings()" style="background:none; color:var(--text); border:none; font-size:20px;">⚙️</button>
         </div>
         <div id="output"></div>
@@ -88,20 +89,18 @@
 
     <div id="chat-settings-sheet">
         <div style="width:40px; height:5px; background:var(--border); align-self:center; border-radius:10px;" onclick="toggleChatSettings()"></div>
-        <h3 style="color:var(--header); margin:10px 0;">Chat Settings</h3>
-        <button class="btn-danger" onclick="deleteCurrentChat()">🗑️ Delete All Messages in Chat</button>
+        <button class="btn-danger" onclick="deleteCurrentChat()">🗑️ Wipe Chat History</button>
         <button class="btn-ghost" onclick="toggleChatSettings()">Close</button>
     </div>
 
     <div id="admin-sheet">
         <div style="width:40px; height:5px; background:var(--border); align-self:center; border-radius:10px;" onclick="closeAdmin()"></div>
-        <h2 style="color:var(--header);">Admin</h2>
         <input type="password" id="admin-pw" placeholder="Admin Key" oninput="loadBanList()">
-        <div style="display:flex; gap:8px; margin-top:10px;">
-            <input type="text" id="ban-target" placeholder="User to ban...">
+        <div style="display:flex; gap:8px;">
+            <input type="text" id="ban-target" placeholder="User...">
             <button class="btn-danger" onclick="adminAction('banUser')" style="width:80px;">Ban</button>
         </div>
-        <div id="ban-list-container" style="flex:1; overflow-y:auto; margin-top:10px;"></div>
+        <div id="ban-list-container" style="max-height:150px; overflow-y:auto;"></div>
         <button class="btn-ghost" onclick="closeAdmin()">Close</button>
     </div>
 
@@ -117,11 +116,23 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let myUser = "", activeRoom = "", chatInterval = null;
 
-    function formatTime(isoStr) {
-        const date = isoStr ? new Date(isoStr) : new Date();
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    // --- DATE HELPERS ---
+    function getDisplayDate(isoStr) {
+        const date = new Date(isoStr);
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+
+        if (date.toDateString() === today.toDateString()) return "Today";
+        if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
+        return date.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' });
     }
 
+    function formatTime(isoStr) {
+        return new Date(isoStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // --- NAVIGATION ---
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -135,6 +146,7 @@
         if(screenId === 'settings-screen') document.getElementById('settings-username-display').innerText = myUser;
     }
 
+    // --- AUTH ---
     async function handleAuth(type) {
         const user = document.getElementById(`${type}-user`).value.trim();
         const pass = document.getElementById(`${type}-pass`).value;
@@ -156,11 +168,12 @@
         }
     }
 
+    // --- MESSAGING ---
     async function loadChatHub() {
         const { data } = await _supabase.from('messages').select('room_id').neq('room_id', null);
         const rooms = [...new Set((data || []).map(m => m.room_id))].filter(r => r.includes(myUser));
         const list = document.getElementById('chat-list');
-        list.innerHTML = rooms.length ? '' : '<p style="text-align:center; opacity:0.3; margin-top:20px;">No chats yet.</p>';
+        list.innerHTML = rooms.length ? '' : '<p style="text-align:center; opacity:0.3; margin-top:20px;">No messages.</p>';
         rooms.forEach(r => {
             const other = r.replace(myUser, '').replace('_', '');
             list.innerHTML += `<div class="btn-ghost" onclick="openChat('${r}', '${other}')" style="margin-bottom:10px; padding:15px; display:flex; justify-content:space-between; width:100%; border-radius:18px;"><b>👤 ${other}</b><span>›</span></div>`;
@@ -171,7 +184,7 @@
         const target = document.getElementById('new-chat-user').value.trim();
         if(!target || target === myUser) return;
         const roomId = [myUser, target].sort().join('_');
-        await _supabase.from('messages').insert([{ content: 'Chat started.', username: 'System', room_id: roomId }]);
+        await _supabase.from('messages').insert([{ content: 'Chat initialized.', username: 'System', room_id: roomId }]);
         openChat(roomId, target);
         document.getElementById('new-chat-user').value = '';
     }
@@ -197,11 +210,25 @@
         if(!activeRoom) return;
         const { data } = await _supabase.from('messages').select('*').eq('room_id', activeRoom).order('created_at', {ascending: true});
         const out = document.getElementById('output');
-        out.innerHTML = (data || []).map(m => {
-            if(m.username === 'System') return `<div class="msg-sys">${m.content}</div>`;
-            const isMe = m.username === myUser;
-            return `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}" ${isMe ? `onclick="deleteMessage('${m.id}')"` : ''}>${m.content}<span class="time">${formatTime(m.created_at)}</span></div>`;
-        }).join('');
+        let lastDate = "";
+        let html = "";
+
+        (data || []).forEach(m => {
+            const msgDate = new Date(m.created_at).toDateString();
+            if (msgDate !== lastDate) {
+                html += `<div class="date-divider">${getDisplayDate(m.created_at)}</div>`;
+                lastDate = msgDate;
+            }
+
+            if(m.username === 'System') {
+                html += `<div class="msg-sys">${m.content}</div>`;
+            } else {
+                const isMe = m.username === myUser;
+                html += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}" ${isMe ? `onclick="deleteMessage('${m.id}')"` : ''}>${m.content}<span class="time">${formatTime(m.created_at)}</span></div>`;
+            }
+        });
+
+        out.innerHTML = html;
         out.scrollTop = out.scrollHeight;
     }
 
@@ -212,23 +239,22 @@
         input.value = ''; loadMessages();
     }
 
-    // --- NEW DELETE FEATURES ---
+    // --- SETTINGS & DELETE ---
     function toggleChatSettings() { document.getElementById('chat-settings-sheet').classList.toggle('open'); }
 
     async function deleteCurrentChat() {
-        if(!confirm("Wipe all messages in this chat? This cannot be undone.")) return;
+        if(!confirm("Wipe chat history?")) return;
         await _supabase.from('messages').delete().eq('room_id', activeRoom);
-        toggleChatSettings();
-        loadMessages();
+        toggleChatSettings(); loadMessages();
     }
 
     async function deleteMessage(msgId) {
-        if(!confirm("Delete this message?")) return;
+        if(!confirm("Delete message?")) return;
         await _supabase.from('messages').delete().eq('id', msgId);
         loadMessages();
     }
 
-    // --- ADMIN Logic ---
+    // --- ADMIN ---
     function openAdmin() { document.getElementById('admin-sheet').classList.add('open'); }
     function closeAdmin() { document.getElementById('admin-sheet').classList.remove('open'); }
 
@@ -237,10 +263,8 @@
         const { data: auth } = await _supabase.from('admin_keys').select('pass_key').eq('pass_key', pw).single();
         if(!auth) return;
         const { data: bans } = await _supabase.from('banned_users').select('*');
-        document.getElementById('ban-list-container').innerHTML = (bans || []).map(b => `<div style="display:flex; justify-content:space-between; margin-bottom:10px; background:var(--input); padding:10px; border-radius:10px;"><span>${b.username}</span><button onclick="unbanUser('${b.username}')" style="padding:5px 10px; font-size:12px;" class="btn-danger">Unban</button></div>`).join('');
+        document.getElementById('ban-list-container').innerHTML = (bans || []).map(b => `<div style="display:flex; justify-content:space-between; margin-bottom:10px; background:var(--input); padding:10px; border-radius:10px;"><span>${b.username}</span><button onclick="unbanUser('${b.username}')" style="padding:5px;">Unban</button></div>`).join('');
     }
-
-    async function unbanUser(u) { await _supabase.from('banned_users').delete().eq('username', u); loadBanList(); }
 
     async function adminAction(action) {
         const pw = document.getElementById('admin-pw').value;
