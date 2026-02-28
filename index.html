@@ -3,52 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Messenger Pigeon</title>
+    <title>Private Chat</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Theme Variables */
-        :root { 
-            --primary: #3ecf8e; --user-msg: #3b82f6; 
-            --bg: #0b0e11; --card: #15191c; --input: #22272b; --border: #2d3339; --text: #ffffff; 
-        }
-        
-        body.light-mode {
-            --bg: #f0f2f5; --card: #ffffff; --input: #f0f2f5; --border: #e4e6eb; --text: #1c1e21;
-        }
-
-        * { box-sizing: border-box; transition: background 0.3s, color 0.3s, transform 0.2s; }
+        :root { --primary: #3ecf8e; --user-msg: #3b82f6; --bg: #0b0e11; --card: #15191c; --input: #22272b; --border: #2d3339; --text: #ffffff; }
+        body.light-mode { --bg: #f0f2f5; --card: #ffffff; --input: #f0f2f5; --border: #e4e6eb; --text: #1c1e21; }
+        * { box-sizing: border-box; transition: 0.2s; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; height: 100vh; margin: 0; padding: 20px; }
-        
-        .container { width: 100%; max-width: 450px; background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; position: relative; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        
-        .screen { padding: 40px 30px; display: none; flex-direction: column; gap: 15px; height: 100%; animation: fadeIn 0.2s ease; }
+        .container { width: 100%; max-width: 450px; background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .screen { padding: 30px; display: none; flex-direction: column; gap: 15px; height: 100%; }
         .active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         input { background: var(--input); border: 1px solid var(--border); color: var(--text); padding: 14px; border-radius: 8px; outline: none; }
         button { border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; background: var(--primary); color: #000; }
-        .secondary { background: var(--border); color: var(--text); }
-        .link-btn { background: none; color: #888; font-size: 0.9rem; }
-
-        /* Chat UI */
-        #chat-header { padding: 15px 20px; background: var(--card); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
         #output { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        
         .msg { padding: 12px; border-radius: 12px; max-width: 85%; word-break: break-word; }
         .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 2px; }
         .msg-other { align-self: flex-start; background: var(--input); border-bottom-left-radius: 2px; }
-
-        .msg-header { display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 6px; gap: 15px; }
-        .msg-header b { color: var(--primary); }
-        .msg-me .msg-header b { color: #fff; }
-
-        /* Icon Button Styling */
-        .send-btn { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
-        
-        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card); padding: 30px; border-radius: 12px; width: 100%; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 15px; }
-
-        .input-area { padding: 15px; background: var(--card); border-top: 1px solid var(--border); }
+        .msg-header { display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 4px; opacity: 0.8; }
+        .send-area { padding: 15px; display: flex; gap: 10px; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -56,48 +28,37 @@
 <div class="container">
     <div id="login-screen" class="screen active">
         <h2>Login</h2>
-        <input type="text" id="login-user" placeholder="Username">
+        <input type="text" id="login-user" placeholder="Your Username">
         <input type="password" id="login-pass" placeholder="Password">
         <button onclick="handleAuth('login')">Sign In</button>
-        <button class="link-btn" onclick="showScreen('signup-screen')">Create Account</button>
+        <button onclick="showScreen('signup-screen')" style="background:none; color:#888;">Create Account</button>
     </div>
 
     <div id="signup-screen" class="screen">
         <h2>Sign Up</h2>
-        <input type="text" id="signup-user" placeholder="Username">
+        <input type="text" id="signup-user" placeholder="Choose Username">
         <input type="password" id="signup-pass" placeholder="Password">
         <button onclick="handleAuth('signup')">Register</button>
-        <button class="link-btn" onclick="showScreen('login-screen')">Back to Login</button>
+        <button onclick="showScreen('login-screen')" style="background:none; color:#888;">Back</button>
     </div>
 
-    <div id="settings-screen" class="screen">
-        <h2>Settings</h2>
-        <button class="secondary" onclick="toggleTheme()">🌓 Switch Theme (Light/Dark)</button>
-        <button class="secondary" onclick="openModal('admin-modal')">Admin Tools</button>
-        <button class="secondary" onclick="logout()" style="background:#ff4d4d; color:white;">Logout</button>
-        <button onclick="showScreen('chat-screen')">Back to Chat</button>
+    <div id="start-screen" class="screen">
+        <h2>Private Chat</h2>
+        <p style="color:#888; text-align:center;">Who do you want to chat with?</p>
+        <input type="text" id="target-user" placeholder="Their Username">
+        <button onclick="startPrivateChat()">Start Chatting</button>
+        <button onclick="logout()" style="margin-top:20px; background:#ff4d4d; color:white;">Logout</button>
     </div>
 
     <div id="chat-screen" class="screen" style="padding:0; gap:0;">
-        <div id="chat-header">
-            <span id="display-user">Chat</span>
-            <button onclick="showScreen('settings-screen')" style="background:none; color:#888; font-size:1.2rem;">⚙️</button>
+        <div style="padding:15px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+            <b id="chat-with-label">Chat</b>
+            <button onclick="showScreen('start-screen')" style="background:none; color:#888;">✕</button>
         </div>
         <div id="output"></div>
-        <div class="input-area">
-            <div style="display:flex; gap:10px; align-items:center;">
-                <input type="text" id="msg" placeholder="Type a message..." style="flex:1" maxlength="1024">
-                <button class="send-btn" onclick="sendMsg()">➤</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="admin-modal" class="modal">
-        <div class="modal-content">
-            <h3>Admin Panel</h3>
-            <input type="password" id="admin-pw" placeholder="Admin Password">
-            <button onclick="clearChat()" style="background:#ff4d4d; color:white;">Clear Database</button>
-            <button class="link-btn" onclick="closeModal('admin-modal')">Close</button>
+        <div class="send-area">
+            <input type="text" id="msg" placeholder="Type a message..." style="flex:1">
+            <button onclick="sendMsg()">➤</button>
         </div>
     </div>
 </div>
@@ -107,24 +68,13 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsZmRnZ3ppbG5kdnRieWZxYmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNDUwOTgsImV4cCI6MjA4NzYyMTA5OH0.XlzFZSAimDc2SxEAwGn18wqEtDF3mqzYe6nW93OzZpU';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let currentUserId = null;
-
-    // Theme Logic
-    function toggleTheme() {
-        document.body.classList.toggle('light-mode');
-        localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
-    }
-    
-    // Load Saved Theme
-    if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+    let myUser = "";
+    let activeRoomId = "";
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
-
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     async function handleAuth(type) {
         const user = document.getElementById(`${type}-user`).value;
@@ -138,27 +88,33 @@
     async function checkUser() {
         const { data: { user } } = await _supabase.auth.getUser();
         if (user) {
-            currentUserId = user.id;
-            document.getElementById('display-user').innerText = user.email.split('@')[0];
-            showScreen('chat-screen');
-            loadMessages();
+            myUser = user.email.split('@')[0];
+            showScreen('start-screen');
         } else showScreen('login-screen');
     }
 
-    async function logout() { await _supabase.auth.signOut(); checkUser(); }
+    function startPrivateChat() {
+        const target = document.getElementById('target-user').value.trim();
+        if (!target || target === myUser) return alert("Enter a valid username");
+        
+        // Sort names alphabetically so Room(A,B) is the same as Room(B,A)
+        activeRoomId = [myUser, target].sort().join('_');
+        document.getElementById('chat-with-label').innerText = "Chatting with: " + target;
+        showScreen('chat-screen');
+        loadMessages();
+    }
 
     async function loadMessages() {
-        const { data } = await _supabase.from('messages').select('*').order('created_at', { ascending: true });
+        if (!activeRoomId) return;
+        const { data } = await _supabase.from('messages').select('*').eq('room_id', activeRoomId).order('created_at', { ascending: true });
         const output = document.getElementById('output');
         output.innerHTML = '';
         data.forEach(m => {
-            const time = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const isMe = m.user_id === currentUserId;
-            output.innerHTML += `
-                <div class="msg ${isMe ? 'msg-me' : 'msg-other'}">
-                    <div class="msg-header"><b>${m.username}</b> <span>${time}</span></div>
-                    <div>${m.content}</div>
-                </div>`;
+            const isMe = m.username === myUser;
+            output.innerHTML += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}">
+                <div class="msg-header"><b>${m.username}</b></div>
+                ${m.content}
+            </div>`;
         });
         output.scrollTop = output.scrollHeight;
     }
@@ -166,26 +122,19 @@
     async function sendMsg() {
         const input = document.getElementById('msg');
         if (!input.value.trim()) return;
-        const { data: { user } } = await _supabase.auth.getUser();
-        await _supabase.from('messages').insert([{ content: input.value, username: user.email.split('@')[0], user_id: user.id }]);
+        await _supabase.from('messages').insert([{ 
+            content: input.value, 
+            username: myUser, 
+            room_id: activeRoomId 
+        }]);
         input.value = '';
         loadMessages();
     }
 
+    async function logout() { await _supabase.auth.signOut(); checkUser(); }
     document.getElementById('msg').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMsg(); });
-
-    async function clearChat() {
-        const pw = document.getElementById('admin-pw').value;
-        const { data } = await _supabase.from('admin_keys').select('pass_key').eq('pass_key', pw).single();
-        if (data) {
-            await _supabase.from('messages').delete().gt('id', 0);
-            closeModal('admin-modal');
-            loadMessages();
-        } else alert("Invalid Password");
-    }
-
     checkUser();
-    setInterval(() => { if(document.getElementById('chat-screen').classList.contains('active')) loadMessages() }, 3000);
+    setInterval(() => { if(activeRoomId) loadMessages() }, 3000);
 </script>
 </body>
 </html>
