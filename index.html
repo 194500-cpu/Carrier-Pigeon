@@ -25,6 +25,10 @@
         .list-item { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .list-item:hover { background: rgba(255,255,255,0.05); }
 
+        /* Settings Card */
+        .user-profile { background: var(--input); padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; border: 1px solid var(--border); }
+        .user-profile h3 { margin: 5px 0; color: var(--primary); }
+
         /* Chat Styling */
         #output { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .msg { padding: 10px 14px; border-radius: 15px; max-width: 80%; word-break: break-word; font-size: 0.95rem; }
@@ -64,8 +68,12 @@
     </div>
 
     <div id="settings-screen" class="screen" style="padding: 30px;">
-        <h2>Settings</h2>
-        <button onclick="toggleTheme()" class="secondary" style="background: var(--input); color:var(--text)">🌓 Toggle Theme</button>
+        <div class="user-profile">
+            <div style="font-size: 0.8rem; opacity: 0.6;">Logged in as</div>
+            <h3 id="settings-username-display">Username</h3>
+        </div>
+        <button onclick="toggleTheme()" class="secondary" style="background: var(--input); color:var(--text); margin-bottom: 10px;">🌓 Toggle Theme</button>
+        <button onclick="openAdminModal()" style="background: var(--input); color:var(--text); border: 1px solid var(--border);">🛠️ Admin Panel</button>
         <button onclick="logout()" style="background:#ff4d4d; color:white; margin-top: auto;">Logout</button>
     </div>
 
@@ -84,9 +92,9 @@
 
     <div id="admin-modal" class="modal">
         <div style="background: var(--card); padding: 25px; border-radius: 15px; width: 100%; display: flex; flex-direction: column; gap: 15px;">
-            <h3>Close & Delete Room?</h3>
+            <h3>Admin Authorization</h3>
             <input type="password" id="admin-pw" placeholder="Admin Password">
-            <button onclick="adminDeleteRoom()" style="background:#ff4d4d; color:white;">Delete Forever</button>
+            <button onclick="adminDeleteRoom()" style="background:#ff4d4d; color:white;">Delete Current Room</button>
             <button onclick="document.getElementById('admin-modal').style.display='none'">Cancel</button>
         </div>
     </div>
@@ -113,7 +121,11 @@
         showScreen(screenId);
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
         document.getElementById('nav-' + screenId.split('-')[0]).classList.add('active-nav');
+        
         if(screenId === 'home-screen') loadChatHub();
+        if(screenId === 'settings-screen') {
+            document.getElementById('settings-username-display').innerText = myUser;
+        }
     }
 
     async function handleAuth(type) {
@@ -139,7 +151,7 @@
         const { data } = await _supabase.from('messages').select('room_id').neq('room_id', null);
         const rooms = [...new Set(data.map(m => m.room_id))].filter(r => r.includes(myUser));
         const list = document.getElementById('chat-list');
-        list.innerHTML = rooms.length ? '' : '<p style="text-align:center; opacity:0.5; margin-top:20px;">No open chats</p>';
+        list.innerHTML = rooms.length ? '' : '<p style="text-align:center; opacity:0.5; margin-top:40px;">No private chats yet</p>';
         rooms.forEach(r => {
             const other = r.replace(myUser, '').replace('_', '');
             list.innerHTML += `<div class="list-item" onclick="openChat('${r}', '${other}')"><span>👤 ${other}</span><span>›</span></div>`;
@@ -151,6 +163,7 @@
         if(!target || target === myUser) return;
         const roomId = [myUser, target].sort().join('_');
         openChat(roomId, target);
+        document.getElementById('new-chat-user').value = '';
     }
 
     function openChat(roomId, name) {
@@ -191,8 +204,9 @@
         if(data) {
             await _supabase.from('messages').delete().eq('room_id', activeRoom);
             document.getElementById('admin-modal').style.display = 'none';
+            document.getElementById('admin-pw').value = '';
             closeChatWindow();
-        } else alert("Wrong admin pass");
+        } else alert("Invalid Admin Key");
     }
 
     function toggleTheme() {
@@ -200,7 +214,7 @@
         localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
     }
 
-    async function logout() { await _supabase.auth.signOut(); checkUser(); }
+    async function logout() { await _supabase.auth.signOut(); myUser = ""; checkUser(); }
     document.getElementById('msg').addEventListener('keydown', e => e.key === 'Enter' && sendMsg());
     if(localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
     checkUser();
