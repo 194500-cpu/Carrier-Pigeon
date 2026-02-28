@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pigeon Messenger ++</title>
+    <title>Pigeon Messenger Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary: #3ecf8e; --user-msg: #3b82f6; --bg: #0b0e11; --card: #1c2127; --input: #2d333b; --border: #444c56; --text: #adbac7; --header: #ffffff; }
@@ -24,13 +24,15 @@
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; opacity: 0.5; }
         .nav-item.active-nav { opacity: 1; color: var(--primary); }
 
-        #output { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 10px 0; }
+        #output { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 10px 0; scroll-behavior: smooth; }
         .date-divider { align-self: center; font-size: 10px; font-weight: 700; opacity: 0.5; margin: 15px 0; background: var(--input); padding: 4px 12px; border-radius: 10px; text-transform: uppercase; }
         .msg { padding: 12px 16px; border-radius: 20px; max-width: 85%; font-size: 15px; position: relative; cursor: pointer; }
         .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 4px; }
         .msg-other { align-self: flex-start; background: var(--input); color: var(--header); border-bottom-left-radius: 4px; cursor: default; }
         .time { font-size: 9px; opacity: 0.6; margin-top: 4px; display: block; text-align: right; }
         .msg-sys { align-self: center; font-size: 11px; opacity: 0.4; }
+
+        .new-badge { background: var(--primary); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 20px; font-weight: bold; margin-left: 8px; vertical-align: middle; }
 
         #chat-settings-sheet, #admin-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; height: auto; background: var(--card); border-radius: 30px 30px 0 0; border-top: 1px solid var(--border); z-index: 100; padding: 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 -10px 40px rgba(0,0,0,0.4); }
         .open { bottom: 0 !important; }
@@ -97,7 +99,7 @@
         <div style="width:40px; height:5px; background:var(--border); align-self:center; border-radius:10px;" onclick="closeAdmin()"></div>
         <input type="password" id="admin-pw" placeholder="Admin Key" oninput="loadBanList()">
         <div style="display:flex; gap:8px;">
-            <input type="text" id="ban-target" placeholder="User to ban...">
+            <input type="text" id="ban-target" placeholder="User...">
             <button class="btn-danger" onclick="adminAction('banUser')" style="width:80px;">Ban</button>
         </div>
         <div id="ban-list-container" style="max-height:150px; overflow-y:auto; margin-top:10px;"></div>
@@ -116,7 +118,6 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let myUser = "", activeRoom = "", chatInterval = null;
 
-    // Utility Functions
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -136,7 +137,7 @@
         const user = document.getElementById(`${type}-user`).value.trim();
         const pass = document.getElementById(`${type}-pass`).value;
         const { data: ban } = await _supabase.from('banned_users').select('username').eq('username', user).single();
-        if(ban) return alert("This account is banned.");
+        if(ban) return alert("Banned.");
         const { error } = await (type === 'login' ? _supabase.auth.signInWithPassword({email: user+'@chat.com', password: pass}) : _supabase.auth.signUp({email: user+'@chat.com', password: pass}));
         if (error) alert(error.message); else checkUser();
     }
@@ -154,14 +155,30 @@
     }
 
     async function loadChatHub() {
-        const { data } = await _supabase.from('messages').select('room_id').neq('room_id', null);
-        const rooms = [...new Set((data || []).map(m => m.room_id))].filter(r => r.includes(myUser));
-        const list = document.getElementById('chat-list');
-        list.innerHTML = rooms.length ? '' : '<p style="text-align:center; opacity:0.3; margin-top:20px;">No chats found.</p>';
-        rooms.forEach(r => {
-            const other = r.replace(myUser, '').replace('_', '');
-            list.innerHTML += `<div class="btn-ghost" onclick="openChat('${r}', '${other}')" style="margin-bottom:10px; padding:15px; display:flex; justify-content:space-between; width:100%; border-radius:18px;"><b>👤 ${other}</b><span>›</span></div>`;
+        const { data } = await _supabase.from('messages').select('room_id, created_at, username').neq('room_id', null).order('created_at', {ascending: false});
+        
+        // Group by room and find latest message time
+        const roomsMap = {};
+        (data || []).forEach(m => {
+            if (m.room_id.includes(myUser)) {
+                if (!roomsMap[m.room_id]) roomsMap[m.room_id] = m.created_at;
+            }
         });
+
+        const list = document.getElementById('chat-list');
+        list.innerHTML = Object.keys(roomsMap).length ? '' : '<p style="text-align:center; opacity:0.3; margin-top:20px;">No chats found.</p>';
+        
+        for (const r in roomsMap) {
+            const other = r.replace(myUser, '').replace('_', '');
+            const lastViewed = localStorage.getItem(`viewed_${r}`) || 0;
+            const hasNew = new Date(roomsMap[r]) > new Date(lastViewed);
+            
+            list.innerHTML += `
+                <div class="btn-ghost" onclick="openChat('${r}', '${other}')" style="margin-bottom:10px; padding:15px; display:flex; justify-content:space-between; align-items:center; width:100%; border-radius:18px;">
+                    <b>👤 ${other} ${hasNew ? '<span class="new-badge">NEW</span>' : ''}</b>
+                    <span>›</span>
+                </div>`;
+        }
     }
 
     async function startNewChat() {
@@ -175,6 +192,7 @@
 
     function openChat(roomId, name) {
         activeRoom = roomId;
+        localStorage.setItem(`viewed_${roomId}`, new Date().toISOString());
         document.getElementById('chat-title').innerText = name;
         document.getElementById('chat-window').classList.add('active');
         loadMessages();
@@ -183,6 +201,7 @@
     }
 
     function closeChatWindow() {
+        if(activeRoom) localStorage.setItem(`viewed_${activeRoom}`, new Date().toISOString());
         document.getElementById('chat-window').classList.remove('active');
         activeRoom = "";
         clearInterval(chatInterval);
@@ -191,15 +210,14 @@
 
     async function loadMessages() {
         if(!activeRoom) return;
-        
-        // SECURE LIVE BAN CHECK
         const { data: ban } = await _supabase.from('banned_users').select('username').eq('username', myUser).single();
-        if(ban) { alert("Access Denied: Banned."); logout(); return; }
+        if(ban) { alert("Banned."); logout(); return; }
 
         const { data } = await _supabase.from('messages').select('*').eq('room_id', activeRoom).order('created_at', {ascending: true});
         const out = document.getElementById('output');
-        let lastDate = "", html = "";
+        const isAtBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 60;
 
+        let lastDate = "", html = "";
         (data || []).forEach(m => {
             const msgDate = new Date(m.created_at).toDateString();
             if (msgDate !== lastDate) {
@@ -212,8 +230,9 @@
                 html += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}" ${isMe ? `onclick="deleteMessage('${m.id}')"` : ''}>${m.content}<span class="time">${formatTime(m.created_at)}</span></div>`;
             }
         });
+
         out.innerHTML = html;
-        out.scrollTop = out.scrollHeight;
+        if (isAtBottom) out.scrollTop = out.scrollHeight;
     }
 
     async function sendMsg() {
