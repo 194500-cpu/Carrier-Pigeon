@@ -8,41 +8,37 @@
     <style>
         :root { --primary: #3ecf8e; --user-msg: #3b82f6; --bg: #0b0e11; --card: #1c2127; --input: #2d333b; --border: #444c56; --text: #adbac7; --header: #ffffff; }
         body.light-mode { --bg: #f6f8fa; --card: #ffffff; --input: #f6f8fa; --border: #d0d7de; --text: #24292f; --header: #1f2328; }
-        * { box-sizing: border-box; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; height: 100vh; margin: 0; padding: 10px; overflow: hidden; }
+        * { box-sizing: border-box; transition: all 0.2s ease; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; height: 100vh; margin: 0; padding: 10px; overflow: hidden; }
         
-        .container { width: 100%; max-width: 450px; background: var(--card); border-radius: 32px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .container { width: 100%; max-width: 450px; background: var(--card); border-radius: 32px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; position: relative; }
         .screen { display: none; flex-direction: column; height: calc(100% - 65px); padding: 20px; }
-        .active { display: flex; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .active { display: flex; }
 
-        input { background: var(--input); border: 1px solid var(--border); color: var(--header); padding: 16px; border-radius: 14px; outline: none; font-size: 16px; width: 100%; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(62, 207, 142, 0.1); }
-        button { border: none; padding: 16px; border-radius: 14px; font-weight: 600; cursor: pointer; background: var(--primary); color: #000; font-size: 15px; }
-        .btn-danger { background: #ff4d4d !important; color: white !important; }
+        input { background: var(--input); border: 1px solid var(--border); color: var(--header); padding: 16px; border-radius: 14px; outline: none; width: 100%; }
+        button { border: none; padding: 16px; border-radius: 14px; font-weight: 600; cursor: pointer; background: var(--primary); color: #000; }
         .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .btn-danger { background: #ff4d4d !important; color: white !important; }
 
         .nav-bar { position: absolute; bottom: 0; width: 100%; height: 65px; background: var(--card); display: flex; border-top: 1px solid var(--border); z-index: 10; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; opacity: 0.5; font-weight: 700; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; opacity: 0.5; }
         .nav-item.active-nav { opacity: 1; color: var(--primary); }
 
-        #output { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 10px 0; scroll-behavior: smooth; }
-        .msg { padding: 12px 16px; border-radius: 20px; max-width: 85%; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
+        #output { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 10px 0; }
+        .msg { padding: 12px 16px; border-radius: 20px; max-width: 85%; font-size: 15px; }
         .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 4px; }
         .msg-other { align-self: flex-start; background: var(--input); color: var(--header); border-bottom-left-radius: 4px; }
-        .msg-sys { align-self: center; background: transparent; color: var(--text); font-size: 12px; opacity: 0.6; }
+        .msg-sys { align-self: center; font-size: 11px; opacity: 0.5; }
 
-        #admin-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; height: 85%; background: var(--card); border-radius: 30px 30px 0 0; border-top: 1px solid var(--border); z-index: 100; padding: 25px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.4); }
+        #admin-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; height: 80%; background: var(--card); border-radius: 30px 30px 0 0; border-top: 1px solid var(--border); z-index: 100; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
         #admin-sheet.open { bottom: 0; }
-        .admin-label { font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-        .ban-card { background: var(--input); padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="login-screen" class="screen active" style="justify-content:center; gap:15px;">
-        <h1 style="color:var(--header); text-align:center;">Vault Chat</h1>
+        <h1 style="text-align:center; color:var(--header);">Vault Chat</h1>
         <input type="text" id="login-user" placeholder="Username">
         <input type="password" id="login-pass" placeholder="Password">
         <button onclick="handleAuth('login')">Sign In</button>
@@ -50,7 +46,7 @@
     </div>
 
     <div id="signup-screen" class="screen" style="justify-content:center; gap:15px;">
-        <h1 style="color:var(--header); text-align:center;">Register</h1>
+        <h1 style="text-align:center; color:var(--header);">Register</h1>
         <input type="text" id="signup-user" placeholder="Username">
         <input type="password" id="signup-pass" placeholder="Password">
         <button onclick="handleAuth('signup')">Create Account</button>
@@ -60,7 +56,7 @@
     <div id="home-screen" class="screen">
         <h2 style="color:var(--header); margin-top:0;">Messages</h2>
         <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <input type="text" id="new-chat-user" placeholder="Target Username...">
+            <input type="text" id="new-chat-user" placeholder="Username...">
             <button onclick="startNewChat()" style="width:60px;">+</button>
         </div>
         <div id="chat-list" style="overflow-y:auto; flex:1;"></div>
@@ -69,48 +65,38 @@
     <div id="settings-screen" class="screen">
         <h2 style="color:var(--header); margin-top:0;">Settings</h2>
         <div style="background:var(--input); padding:20px; border-radius:20px; margin-bottom:20px; text-align:center;">
-            <div style="font-size:13px; opacity:0.6;">Account Name</div>
+            <div style="font-size:12px; opacity:0.6;">Signed in as</div>
             <div id="settings-username-display" style="font-size:22px; font-weight:700; color:var(--header);">---</div>
         </div>
-        <div style="display:flex; flex-direction:column; gap:12px;">
-            <button class="btn-ghost" onclick="toggleTheme()">🌓 Appearance</button>
-            <button class="btn-ghost" onclick="openAdmin()">🛠️ Admin Console</button>
-            <button class="btn-danger" onclick="logout()" style="margin-top:auto;">Sign Out</button>
-        </div>
+        <button class="btn-ghost" onclick="toggleTheme()" style="margin-bottom:10px; width:100%;">🌓 Appearance</button>
+        <button class="btn-ghost" onclick="openAdmin()" style="width:100%;">🛠️ Admin Console</button>
+        <button class="btn-danger" onclick="logout()" style="margin-top:auto;">Sign Out</button>
     </div>
 
-    <div id="chat-window" class="screen" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:50; background:var(--card); padding-bottom:15px;">
+    <div id="chat-window" class="screen" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:50; background:var(--card);">
         <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:15px; border-bottom:1px solid var(--border);">
-            <button class="btn-ghost" onclick="closeChatWindow()" style="padding:10px; border:none;">←</button>
+            <button onclick="closeChatWindow()" style="background:none; color:var(--text); border:none; font-size:20px;">←</button>
             <b id="chat-title" style="color:var(--header)">Chat</b>
-            <button class="btn-ghost" onclick="openAdmin()" style="padding:10px; border:none;">⚙️</button>
+            <div style="width:20px;"></div>
         </div>
         <div id="output"></div>
         <div style="display:flex; gap:10px; padding-top:10px;">
-            <input type="text" id="msg" placeholder="Type a message...">
+            <input type="text" id="msg" placeholder="Message...">
             <button onclick="sendMsg()" style="width:60px;">➤</button>
         </div>
     </div>
 
     <div id="admin-sheet">
-        <div style="width:40px; height:5px; background:var(--border); border-radius:10px; align-self:center; margin-bottom:10px; cursor:pointer;" onclick="closeAdmin()"></div>
-        <h2 style="color:var(--header); margin:0;">Admin Console</h2>
+        <div style="width:40px; height:5px; background:var(--border); align-self:center; border-radius:10px;" onclick="closeAdmin()"></div>
+        <h2 style="color:var(--header);">Admin</h2>
         <input type="password" id="admin-pw" placeholder="Admin Key" oninput="loadBanList()">
-        
-        <div class="admin-group">
-            <div class="admin-label">Room Control</div>
-            <button class="btn-danger" onclick="adminAction('deleteRoom')">Delete Current Room</button>
+        <button class="btn-danger" onclick="adminAction('deleteRoom')">Delete Room</button>
+        <div style="display:flex; gap:8px;">
+            <input type="text" id="ban-target" placeholder="User to ban...">
+            <button class="btn-danger" onclick="adminAction('banUser')">Ban</button>
         </div>
-
-        <div class="admin-group" style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
-            <div class="admin-label">User Access</div>
-            <div style="display:flex; gap:8px;">
-                <input type="text" id="ban-target" placeholder="User to ban..." style="padding:10px;">
-                <button class="btn-danger" onclick="adminAction('banUser')" style="padding:10px; width:80px;">Ban</button>
-            </div>
-            <div id="ban-list-container" style="overflow-y:auto; margin-top:10px; flex:1;"></div>
-        </div>
-        <button class="btn-ghost" onclick="closeAdmin()">Dismiss</button>
+        <div id="ban-list-container" style="flex:1; overflow-y:auto;"></div>
+        <button class="btn-ghost" onclick="closeAdmin()">Close</button>
     </div>
 
     <div class="nav-bar" id="bottom-nav" style="display:none">
@@ -163,10 +149,10 @@
         const { data } = await _supabase.from('messages').select('room_id').neq('room_id', null);
         const rooms = [...new Set((data || []).map(m => m.room_id))].filter(r => r.includes(myUser));
         const list = document.getElementById('chat-list');
-        list.innerHTML = rooms.length ? '' : '<p style="text-align:center; opacity:0.3; margin-top:40px;">No conversations yet.</p>';
+        list.innerHTML = rooms.length ? '' : '<p style="text-align:center; opacity:0.3;">No chats found.</p>';
         rooms.forEach(r => {
             const other = r.replace(myUser, '').replace('_', '');
-            list.innerHTML += `<div class="btn-ghost" onclick="openChat('${r}', '${other}')" style="margin-bottom:10px; display:flex; justify-content:space-between; width:100%; border-radius:18px; padding:15px; border:1px solid var(--border);"><b>👤 ${other}</b><span>›</span></div>`;
+            list.innerHTML += `<div class="btn-ghost" onclick="openChat('${r}', '${other}')" style="margin-bottom:10px; padding:15px; display:flex; justify-content:space-between; width:100%; border-radius:18px;"><b>👤 ${other}</b><span>›</span></div>`;
         });
     }
 
@@ -174,11 +160,10 @@
         const target = document.getElementById('new-chat-user').value.trim();
         if(!target || target === myUser) return;
         const roomId = [myUser, target].sort().join('_');
-        // Check if room already has messages
-        const { count } = await _supabase.from('messages').select('*', { count: 'exact', head: true }).eq('room_id', roomId);
-        if (count === 0) {
-            await _supabase.from('messages').insert([{ content: 'Chat initialized.', username: 'System', room_id: roomId }]);
-        }
+        
+        // Initialize room with a system message so it appears in the list
+        await _supabase.from('messages').insert([{ content: 'Chat started.', username: 'System', room_id: roomId }]);
+        
         openChat(roomId, target);
         document.getElementById('new-chat-user').value = '';
     }
@@ -204,8 +189,8 @@
         const { data } = await _supabase.from('messages').select('*').eq('room_id', activeRoom).order('created_at', {ascending: true});
         const out = document.getElementById('output');
         out.innerHTML = (data || []).map(m => {
-            if(m.username === 'System') return `<div class="msg-sys">${m.content}</div>`;
-            return `<div class="msg ${m.username === myUser ? 'msg-me' : 'msg-other'}">${m.content}</div>`;
+            const cls = m.username === 'System' ? 'msg-sys' : (m.username === myUser ? 'msg-me' : 'msg-other');
+            return `<div class="msg ${cls}">${m.content}</div>`;
         }).join('');
         out.scrollTop = out.scrollHeight;
     }
@@ -224,36 +209,24 @@
         const pw = document.getElementById('admin-pw').value;
         const { data: auth } = await _supabase.from('admin_keys').select('pass_key').eq('pass_key', pw).single();
         const container = document.getElementById('ban-list-container');
-        if(!auth) return container.innerHTML = "";
-        
+        if(!auth) return;
         const { data: bans } = await _supabase.from('banned_users').select('*');
-        container.innerHTML = (bans || []).map(b => `
-            <div class="ban-card">
-                <span style="color:var(--header); font-weight:600;">${b.username}</span>
-                <button onclick="unbanUser('${b.username}')" style="padding:6px 12px; font-size:12px; border-radius:8px;" class="btn-danger">Unban</button>
-            </div>
-        `).join('');
+        container.innerHTML = (bans || []).map(b => `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${b.username}</span><button onclick="unbanUser('${b.username}')" style="padding:5px;">Unban</button></div>`).join('');
     }
 
-    async function unbanUser(user) {
-        await _supabase.from('banned_users').delete().eq('username', user);
-        loadBanList();
-    }
+    async function unbanUser(u) { await _supabase.from('banned_users').delete().eq('username', u); loadBanList(); }
 
     async function adminAction(action) {
         const pw = document.getElementById('admin-pw').value;
         const { data: auth } = await _supabase.from('admin_keys').select('pass_key').eq('pass_key', pw).single();
-        if(!auth) return alert("Wrong Admin Key");
-
-        if(action === 'deleteRoom') {
-            if(!activeRoom) return alert("No active room");
+        if(!auth) return alert("Wrong key");
+        if(action === 'deleteRoom' && activeRoom) {
             await _supabase.from('messages').delete().eq('room_id', activeRoom);
             closeChatWindow(); closeAdmin();
         } else if (action === 'banUser') {
-            const target = document.getElementById('ban-target').value.trim();
-            if(!target) return;
-            await _supabase.from('banned_users').insert([{ username: target }]);
-            document.getElementById('ban-target').value = ''; loadBanList();
+            const t = document.getElementById('ban-target').value.trim();
+            if(t) await _supabase.from('banned_users').insert([{ username: t }]);
+            loadBanList();
         }
     }
 
