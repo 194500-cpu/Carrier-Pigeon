@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleek Chat</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #3ecf8e; --user-msg: #3b82f6; --bg: #0b0e11; --card: #15191c; --input: #22272b; --border: #2d3339; --text: #ffffff; }
+        * { box-sizing: border-box; transition: all 0.2s ease; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; height: 100vh; margin: 0; padding: 20px; }
+        
+        .container { width: 100%; max-width: 450px; background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; position: relative; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        /* Screens */
+        .screen { padding: 40px 30px; display: none; flex-direction: column; gap: 15px; height: 100%; animation: fadeIn 0.2s ease; }
+        .active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* UI Elements */
+        h2 { margin: 0; color: var(--primary); text-align: center; }
+        input { background: var(--input); border: 1px solid var(--border); color: white; padding: 14px; border-radius: 8px; outline: none; }
+        button { border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; background: var(--primary); color: #000; }
+        .secondary { background: var(--border); color: white; }
+        .link-btn { background: none; color: #888; font-size: 0.9rem; }
+
+        /* Chat UI */
+        #chat-header { padding: 15px 20px; background: #1c2126; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        #output { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        
+        /* Message Bubbles - Wrapping Fixed */
+        .msg { padding: 12px; border-radius: 12px; max-width: 85%; word-break: break-word; line-height: 1.4; }
+        .msg-me { align-self: flex-end; background: var(--user-msg); border-bottom-right-radius: 2px; }
+        .msg-other { align-self: flex-start; background: var(--input); border-bottom-left-radius: 2px; }
+
+        .msg-header { display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 6px; gap: 15px; }
+        .msg-header b { color: var(--primary); text-transform: uppercase; }
+        .msg-me .msg-header b { color: #fff; }
+        .timestamp { opacity: 0.6; white-space: nowrap; }
+
+        /* Modals */
+        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card); padding: 30px; border-radius: 12px; width: 100%; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 15px; }
+
+        .input-area { padding: 15px; background: #1c2126; display: flex; flex-direction: column; gap: 5px; }
+        .char-count { font-size: 0.65rem; color: #666; text-align: right; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="login-screen" class="screen active">
+        <h2>Login</h2>
+        <input type="text" id="login-user" placeholder="Username">
+        <input type="password" id="login-pass" placeholder="Password">
+        <button onclick="handleAuth('login')">Sign In</button>
+        <button class="link-btn" onclick="showScreen('signup-screen')">Need an account? Sign Up</button>
+    </div>
+
+    <div id="signup-screen" class="screen">
+        <h2>Sign Up</h2>
+        <input type="text" id="signup-user" placeholder="Username">
+        <input type="password" id="signup-pass" placeholder="Password">
+        <button onclick="handleAuth('signup')">Create Account</button>
+        <button class="link-btn" onclick="showScreen('login-screen')">Back to Login</button>
+    </div>
+
+    <div id="settings-screen" class="screen">
+        <h2>Settings</h2>
+        <p style="text-align:center; color:#888;">Logged in as: <b id="settings-user-label"></b></p>
+        <button class="secondary" onclick="openModal('admin-modal')">Open Admin Tools</button>
+        <button class="secondary" onclick="logout()" style="background:#ff4d4d; color:white;">Logout</button>
+        <button onclick="showScreen('chat-screen')">Back to Chat</button>
+    </div>
+
+    <div id="chat-screen" class="screen" style="padding:0; gap:0;">
+        <div id="chat-header">
+            <span id="display-user">Chat</span>
+            <button onclick="showScreen('settings-screen')" style="background:none; color:#666; font-size:1.2rem;">⚙️</button>
+        </div>
+        <div id="output"></div>
+        <div class="input-area">
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="msg" placeholder="Message..." style="flex:1" maxlength="1024" oninput="updateCount()">
+                <button onclick="sendMsg()">Send</button>
+            </div>
+            <div class="char-count" id="char-count">0 / 1024</div>
+        </div>
+    </div>
+
+    <div id="admin-modal" class="modal">
+        <div class="modal-content">
+            <h3>Admin Panel</h3>
+            <input type="password" id="admin-pw" placeholder="Admin Password">
+            <button onclick="clearChat()" style="background:#ff4d4d; color:white;">Clear All Messages</button>
+            <button class="link-btn" onclick="closeModal('admin-modal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://qlfdggzilndvtbyfqbdb.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsZmRnZ3ppbG5kdnRieWZxYmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNDUwOTgsImV4cCI6MjA4NzYyMTA5OH0.XlzFZSAimDc2SxEAwGn18wqEtDF3mqzYe6nW93OzZpU';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUserId = null;
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    function updateCount() {
+        const len = document.getElementById('msg').value.length;
+        document.getElementById('char-count').innerText = `${len} / 1024`;
+    }
+
+    async function handleAuth(type) {
+        const user = document.getElementById(`${type}-user`).value;
+        const pass = document.getElementById(`${type}-pass`).value;
+        const { error } = (type === 'login') 
+            ? await _supabase.auth.signInWithPassword({ email: `${user}@chat.com`, password: pass })
+            : await _supabase.auth.signUp({ email: `${user}@chat.com`, password: pass });
+        
+        if (error) alert(error.message); else checkUser();
+    }
+
+    async function checkUser() {
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (user) {
+            currentUserId = user.id;
+            const name = user.email.split('@')[0];
+            document.getElementById('display-user').innerText = name;
+            document.getElementById('settings-user-label').innerText = name;
+            showScreen('chat-screen');
+            loadMessages();
+        } else {
+            showScreen('login-screen');
+        }
+    }
+
+    async function logout() { await _supabase.auth.signOut(); currentUserId = null; checkUser(); }
+
+    async function loadMessages() {
+        const { data } = await _supabase.from('messages').select('*').order('created_at', { ascending: true });
+        const output = document.getElementById('output');
+        output.innerHTML = '';
+        data.forEach(m => {
+            const time = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const isMe = m.user_id === currentUserId;
+            output.innerHTML += `
+                <div class="msg ${isMe ? 'msg-me' : 'msg-other'}">
+                    <div class="msg-header">
+                        <b>${m.username}</b> 
+                        <span class="timestamp">${time}</span>
+                    </div>
+                    <div>${m.content}</div>
+                </div>`;
+        });
+        output.scrollTop = output.scrollHeight;
+    }
+
+    async function sendMsg() {
+        const input = document.getElementById('msg');
+        const content = input.value.trim();
+        if (!content || content.length > 1024) return;
+        const { data: { user } } = await _supabase.auth.getUser();
+        await _supabase.from('messages').insert([{ 
+            content: content, 
+            username: user.email.split('@')[0], 
+            user_id: user.id 
+        }]);
+        input.value = '';
+        updateCount();
+        loadMessages();
+    }
+
+    document.getElementById('msg').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); sendMsg(); }
+    });
+
+    async function clearChat() {
+        const pw = document.getElementById('admin-pw').value;
+        const { data } = await _supabase.from('admin_keys').select('pass_key').eq('pass_key', pw).single();
+        if (data) {
+            await _supabase.from('messages').delete().gt('id', 0);
+            document.getElementById('admin-pw').value = '';
+            closeModal('admin-modal');
+            loadMessages();
+        } else alert("Invalid Admin Password");
+    }
+
+    checkUser();
+    setInterval(() => { if(document.getElementById('chat-screen').classList.contains('active')) loadMessages() }, 3000);
+</script>
+</body>
+</html>
