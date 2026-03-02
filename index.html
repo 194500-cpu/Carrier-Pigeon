@@ -3,51 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vault Chat Ultra</title>
+    <title>Pigeon Messenger ++</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary: #3ecf8e; --user-msg: #3b82f6; --bg: #0b0e11; --card: #1c2127; --input: #2d333b; --border: #444c56; --text: #adbac7; --header: #ffffff; }
+        body.light-mode { --bg: #f6f8fa; --card: #ffffff; --input: #f6f8fa; --border: #d0d7de; --text: #24292f; --header: #1f2328; }
         * { box-sizing: border-box; transition: all 0.2s ease; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; height: 100vh; margin: 0; padding: 10px; overflow: hidden; }
         
         .container { width: 100%; max-width: 450px; background: var(--card); border-radius: 32px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; position: relative; }
         
-        /* Flicker Animation */
         @keyframes flicker {
             0% { filter: brightness(1); }
             10% { filter: brightness(10) invert(1); }
             20% { filter: brightness(1); }
             30% { filter: brightness(5) sepia(1); }
-            40% { filter: brightness(1); }
             50% { filter: contrast(2) invert(1); }
             100% { filter: brightness(1); }
         }
-        .flicker-active { animation: flicker 1.5s linear; }
+        .flicker-active { animation: flicker 1.2s linear; }
 
         .screen { display: none; flex-direction: column; height: calc(100% - 65px); padding: 20px; }
         .active { display: flex; }
+
         input { background: var(--input); border: 1px solid var(--border); color: var(--header); padding: 16px; border-radius: 14px; outline: none; width: 100%; }
         button { border: none; padding: 16px; border-radius: 14px; font-weight: 600; cursor: pointer; background: var(--primary); color: #000; }
         .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .btn-danger { background: #ff4d4d !important; color: white !important; }
+
         .nav-bar { position: absolute; bottom: 0; width: 100%; height: 65px; background: var(--card); display: flex; border-top: 1px solid var(--border); z-index: 10; }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; opacity: 0.5; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; opacity: 0.5; }
         .nav-item.active-nav { opacity: 1; color: var(--primary); }
+
         #output { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 10px 0; scroll-behavior: smooth; }
-        .msg { padding: 12px 16px; border-radius: 20px; max-width: 85%; font-size: 15px; position: relative; }
+        .msg { padding: 12px 16px; border-radius: 20px; max-width: 85%; font-size: 15px; cursor: pointer; position: relative; }
         .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 4px; }
         .msg-other { align-self: flex-start; background: var(--input); color: var(--header); border-bottom-left-radius: 4px; }
-        .new-badge { background: var(--primary); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 20px; font-weight: bold; margin-left: 8px; }
+        .msg-sys { align-self: center; font-size: 11px; opacity: 0.4; }
+
+        #chat-settings-sheet, #admin-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; height: auto; background: var(--card); border-radius: 30px 30px 0 0; border-top: 1px solid var(--border); z-index: 100; padding: 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 -10px 40px rgba(0,0,0,0.4); }
+        .open { bottom: 0 !important; }
     </style>
 </head>
 <body>
 
 <div class="container" id="main-container">
     <div id="login-screen" class="screen active" style="justify-content:center; gap:15px;">
-        <h1 style="text-align:center; color:var(--header);">Vault Chat</h1>
+        <h1 style="text-align:center; color:var(--header);">Pigeon Messenger ++</h1>
         <input type="text" id="login-user" placeholder="Username">
         <input type="password" id="login-pass" placeholder="Password">
         <button onclick="handleAuth('login')">Sign In</button>
-        <button class="btn-ghost" onclick="showScreen('signup-screen')">New Account</button>
+        <button class="btn-ghost" onclick="showScreen('signup-screen')">New Pigeon</button>
     </div>
 
     <div id="signup-screen" class="screen" style="justify-content:center; gap:15px;">
@@ -59,19 +65,29 @@
     </div>
 
     <div id="home-screen" class="screen">
-        <h2 style="color:var(--header); margin-top:0;">Messages</h2>
+        <h2 style="color:var(--header); margin-top:0;">Pigeon Coop</h2>
         <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <input type="text" id="new-chat-user" placeholder="Target Username...">
+            <input type="text" id="new-chat-user" placeholder="Target Pigeon...">
             <button onclick="startNewChat()" style="width:60px;">+</button>
         </div>
         <div id="chat-list" style="overflow-y:auto; flex:1;"></div>
+    </div>
+
+    <div id="settings-screen" class="screen">
+        <h2 style="color:var(--header); margin-top:0;">Settings</h2>
+        <div style="background:var(--input); padding:20px; border-radius:20px; margin-bottom:20px; text-align:center;">
+            <div id="settings-username-display" style="font-size:22px; font-weight:700; color:var(--header);">---</div>
+        </div>
+        <button class="btn-ghost" onclick="toggleTheme()" style="margin-bottom:10px; width:100%;">🌓 Appearance</button>
+        <button class="btn-ghost" onclick="openAdmin()" style="width:100%;">🛠️ Admin Console</button>
+        <button class="btn-danger" onclick="logout()" style="margin-top:auto;">Sign Out</button>
     </div>
 
     <div id="chat-window" class="screen" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:50; background:var(--card);">
         <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:15px; border-bottom:1px solid var(--border);">
             <button onclick="closeChatWindow()" style="background:none; color:var(--text); border:none; font-size:20px;">←</button>
             <b id="chat-title" style="color:var(--header);">Chat</b>
-            <div style="width:20px;"></div>
+            <button onclick="toggleChatSettings()" style="background:none; color:var(--text); border:none; font-size:20px;">⚙️</button>
         </div>
         <div id="output"></div>
         <div style="display:flex; gap:8px; padding-top:10px;">
@@ -80,8 +96,22 @@
         </div>
     </div>
 
+    <div id="chat-settings-sheet">
+        <div style="width:40px; height:5px; background:var(--border); align-self:center; border-radius:10px;" onclick="toggleChatSettings()"></div>
+        <button class="btn-danger" onclick="deleteCurrentChat()">🗑️ Wipe Chat History</button>
+        <button class="btn-ghost" onclick="toggleChatSettings()">Close</button>
+    </div>
+
+    <div id="admin-sheet">
+        <div style="width:40px; height:5px; background:var(--border); align-self:center; border-radius:10px;" onclick="closeAdmin()"></div>
+        <input type="password" id="admin-pw" placeholder="Admin Key" oninput="loadBanList()">
+        <div id="ban-list-container" style="max-height:150px; overflow-y:auto; margin-top:10px;"></div>
+        <button class="btn-ghost" onclick="closeAdmin()">Close</button>
+    </div>
+
     <div class="nav-bar" id="bottom-nav" style="display:none">
-        <div class="nav-item active-nav" id="nav-home" onclick="navTo('home-screen')">CHATS</div>
+        <div class="nav-item active-nav" id="nav-home" onclick="navTo('home-screen')">💬 PIGEONS</div>
+        <div class="nav-item" id="nav-settings" onclick="navTo('settings-screen')">⚙️ SETTINGS</div>
     </div>
 </div>
 
@@ -89,8 +119,7 @@
     const SUPABASE_URL = 'https://qlfdggzilndvtbyfqbdb.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsZmRnZ3ppbG5kdnRieWZxYmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNDUwOTgsImV4cCI6MjA4NzYyMTA5OH0.XlzFZSAimDc2SxEAwGn18wqEtDF3mqzYe6nW93OzZpU';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    let myUser = "", activeRoom = "", chatInterval = null;
-    let lastProcessedMsgId = null;
+    let myUser = "", activeRoom = "", chatInterval = null, lastProcessedMsgId = null;
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -125,18 +154,15 @@
             }
         });
         const list = document.getElementById('chat-list');
-        list.innerHTML = Object.keys(roomsMap).length ? '' : '<p style="text-align:center; opacity:0.3; margin-top:20px;">No chats.</p>';
+        list.innerHTML = Object.keys(roomsMap).length ? '' : '<p style="text-align:center; opacity:0.3; margin-top:20px;">No pigeons.</p>';
         for (const r in roomsMap) {
             const other = r.replace(myUser, '').replace('_', '');
-            const lastViewed = localStorage.getItem(`viewed_${r}`) || 0;
-            const hasNew = new Date(roomsMap[r]) > new Date(lastViewed);
-            list.innerHTML += `<div class="btn-ghost" onclick="openChat('${r}', '${other}')" style="margin-bottom:10px; padding:15px; display:flex; justify-content:space-between; width:100%; border-radius:18px;"><b>👤 ${other} ${hasNew ? '<span class="new-badge">● NEW</span>' : ''}</b><span>›</span></div>`;
+            list.innerHTML += `<div class="btn-ghost" onclick="openChat('${r}', '${other}')" style="margin-bottom:10px; padding:15px; display:flex; justify-content:space-between; width:100%; border-radius:18px;"><b>👤 ${other}</b><span>›</span></div>`;
         }
     }
 
     function openChat(roomId, name) {
         activeRoom = roomId;
-        localStorage.setItem(`viewed_${roomId}`, new Date().toISOString());
         document.getElementById('chat-title').innerText = name;
         document.getElementById('chat-window').classList.add('active');
         loadMessages();
@@ -145,7 +171,6 @@
     }
 
     function closeChatWindow() {
-        if(activeRoom) localStorage.setItem(`viewed_${activeRoom}`, new Date().toISOString());
         document.getElementById('chat-window').classList.remove('active');
         activeRoom = "";
         clearInterval(chatInterval);
@@ -162,19 +187,20 @@
         (data || []).forEach(m => {
             const isMe = m.username === myUser;
             
-            // FLICKER TRIGGER LOGIC
+            // Flicker Logic
             if (m.content.trim().toLowerCase() === 'beepboopbeep' && m.id !== lastProcessedMsgId) {
                 if (!isMe) {
                     const container = document.getElementById('main-container');
                     container.classList.remove('flicker-active');
-                    void container.offsetWidth; // Trigger reflow
+                    void container.offsetWidth; 
                     container.classList.add('flicker-active');
-                    setTimeout(() => container.classList.remove('flicker-active'), 1500);
+                    setTimeout(() => container.classList.remove('flicker-active'), 1200);
                 }
                 lastProcessedMsgId = m.id;
             }
 
-            html += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}">${m.content}</div>`;
+            if(m.username === 'System') html += `<div class="msg-sys">${m.content}</div>`;
+            else html += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}" onclick="${isMe ? `deleteMessage('${m.id}')` : ''}">${m.content}</div>`;
         });
         out.innerHTML = html;
         if (isAtBottom) out.scrollTop = out.scrollHeight;
@@ -182,27 +208,47 @@
 
     async function sendMsg() {
         const input = document.getElementById('msg');
-        let text = input.value.trim();
-        if(!text) return;
-        await _supabase.from('messages').insert([{ content: text, username: myUser, room_id: activeRoom }]);
-        input.value = ''; 
-        loadMessages();
+        if(!input.value.trim()) return;
+        await _supabase.from('messages').insert([{ content: input.value, username: myUser, room_id: activeRoom }]);
+        input.value = ''; loadMessages();
+    }
+
+    async function deleteMessage(id) {
+        if(confirm("Delete message?")) { await _supabase.from('messages').delete().eq('id', id); loadMessages(); }
+    }
+
+    async function deleteCurrentChat() {
+        if(confirm("Wipe history?")) { await _supabase.from('messages').delete().eq('room_id', activeRoom); toggleChatSettings(); loadMessages(); }
+    }
+
+    function toggleChatSettings() { document.getElementById('chat-settings-sheet').classList.toggle('open'); }
+    function openAdmin() { document.getElementById('admin-sheet').classList.add('open'); }
+    function closeAdmin() { document.getElementById('admin-sheet').classList.remove('open'); }
+
+    function toggleTheme() {
+        document.body.classList.toggle('light-mode');
+        localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
     }
 
     function navTo(id) {
         showScreen(id);
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+        document.getElementById('nav-' + id.split('-')[0]).classList.add('active-nav');
         if(id === 'home-screen') loadChatHub();
+        if(id === 'settings-screen') document.getElementById('settings-username-display').innerText = myUser;
     }
 
     async function startNewChat() {
         const target = document.getElementById('new-chat-user').value.trim();
         if(!target || target === myUser) return;
         const roomId = [myUser, target].sort().join('_');
-        await _supabase.from('messages').insert([{ content: 'Chat started.', username: 'System', room_id: roomId }]);
+        await _supabase.from('messages').insert([{ content: 'Pigeon path established.', username: 'System', room_id: roomId }]);
         openChat(roomId, target);
     }
 
+    async function logout() { await _supabase.auth.signOut(); checkUser(); }
     document.getElementById('msg').addEventListener('keydown', e => e.key === 'Enter' && sendMsg());
+    if(localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
     checkUser();
 </script>
 </body>
