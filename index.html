@@ -6,21 +6,19 @@
     <title>Pigeon Messenger ++</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #3ecf8e; --user-msg: #3b82f6; --bg: #0b0e11; --card: #1c2127; --input: #2d333b; --border: #444c56; --text: #adbac7; --header: #ffffff; }
-        body.light-mode { --bg: #f6f8fa; --card: #ffffff; --input: #f6f8fa; --border: #d0d7de; --text: #24292f; --header: #1f2328; }
+        :root { --primary: #3ecf8e; --user-msg: #3b82f6; --other-msg: #2d333b; --bg: #0b0e11; --card: #1c2127; --input: #2d333b; --border: #444c56; --text: #adbac7; --header: #ffffff; }
+        body.light-mode { --bg: #f6f8fa; --card: #ffffff; --input: #f6f8fa; --border: #d0d7de; --text: #24292f; --header: #1f2328; --other-msg: #e1e4e8; }
         * { box-sizing: border-box; transition: all 0.2s ease; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; height: 100vh; margin: 0; padding: 10px; overflow: hidden; }
         
         .container { width: 100%; max-width: 450px; background: var(--card); border-radius: 32px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; position: relative; }
         
-        /* Persistent Flicker */
         @keyframes constant-flicker {
             0%, 100% { opacity: 1; filter: brightness(1); }
             50% { opacity: 0.7; filter: brightness(2) invert(0.3); }
         }
         .flicker-active { animation: constant-flicker 0.1s infinite; }
 
-        /* Game Overlay */
         #game-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 200; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
         #game-canvas { background: #000; border: 2px solid var(--primary); border-radius: 10px; cursor: pointer; margin: 20px 0; }
 
@@ -36,13 +34,15 @@
         .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; opacity: 0.5; font-weight: bold; }
         .nav-item.active-nav { opacity: 1; color: var(--primary); }
 
-        #output { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 10px 0; scroll-behavior: smooth; }
-        .msg { padding: 12px 16px; border-radius: 20px; max-width: 85%; font-size: 15px; cursor: pointer; position: relative; }
+        #output { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 10px 0; }
+        .msg { padding: 12px 16px; border-radius: 20px; max-width: 80%; font-size: 15px; cursor: pointer; position: relative; word-wrap: break-word; }
+        
+        /* Fixed distinction between Me and Other */
         .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 4px; }
-        .msg-other { align-self: flex-start; background: var(--input); color: var(--header); border-bottom-left-radius: 4px; }
-        .msg-sys { align-self: center; font-size: 11px; opacity: 0.4; }
+        .msg-other { align-self: flex-start; background: var(--other-msg); color: var(--header); border-bottom-left-radius: 4px; }
+        .msg-sys { align-self: center; font-size: 11px; opacity: 0.4; margin: 5px 0; }
 
-        #chat-settings-sheet, #admin-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; height: auto; background: var(--card); border-radius: 30px 30px 0 0; border-top: 1px solid var(--border); z-index: 100; padding: 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 -10px 40px rgba(0,0,0,0.4); transition: bottom 0.3s ease; }
+        #chat-settings-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); z-index: 100; padding: 25px; display: flex; flex-direction: column; gap: 15px; transition: bottom 0.3s ease; }
         .open { bottom: 0 !important; }
     </style>
 </head>
@@ -51,9 +51,8 @@
 <div class="container" id="main-container">
     <div id="game-overlay">
         <h2 style="color: var(--primary);">SYSTEM HIJACKED</h2>
-        <p>Complete Stereo Madness to Restore</p>
         <canvas id="game-canvas" width="300" height="150"></canvas>
-        <p style="font-size: 12px; opacity: 0.7;">SPACE or TAP to Jump</p>
+        <p>Complete Stereo Madness to Restore</p>
     </div>
 
     <div id="login-screen" class="screen active" style="justify-content:center; gap:15px;">
@@ -75,7 +74,6 @@
     <div id="settings-screen" class="screen">
         <h2>Settings</h2>
         <button class="btn-ghost" onclick="toggleTheme()" style="width:100%; margin-bottom:10px;">🌓 Appearance</button>
-        <button class="btn-ghost" onclick="openAdmin()" style="width:100%; margin-bottom:10px;">🛠️ Admin Console</button>
         <button class="btn-danger" onclick="logout()" style="margin-top:auto;">Sign Out</button>
     </div>
 
@@ -97,11 +95,6 @@
         <button class="btn-ghost" onclick="toggleChatSettings()">Close</button>
     </div>
 
-    <div id="admin-sheet">
-        <input type="password" id="admin-pw" placeholder="Admin Key">
-        <button class="btn-ghost" onclick="closeAdmin()">Close</button>
-    </div>
-
     <div class="nav-bar" id="bottom-nav" style="display:none">
         <div class="nav-item active-nav" id="nav-home" onclick="navTo('home-screen')">PIGEONS</div>
         <div class="nav-item" id="nav-settings" onclick="navTo('settings-screen')">SETTINGS</div>
@@ -114,7 +107,7 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let myUser = "", activeRoom = "", chatInterval = null, lastProcessedMsgId = null, currentTriggerId = null;
 
-    // --- MINI GAME ---
+    // --- GAME ---
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
     let gameReq, score = 0, player, spikes = [];
@@ -139,20 +132,16 @@
 
     function updateGame() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        player.vy += 0.9; player.y += player.vy;
+        player.vy += 0.95; player.y += player.vy;
         if(player.y > 120) { player.y = 120; player.vy = 0; player.jumped = false; }
         ctx.fillStyle = "#3ecf8e"; ctx.fillRect(player.x, player.y, player.w, player.h);
-
         if(Math.random() < 0.02) spikes.push({ x: 300, y: 120 });
         spikes.forEach(s => {
-            s.x -= 5;
-            ctx.fillStyle = "#ff4d4d";
-            ctx.beginPath(); ctx.moveTo(s.x, 140); ctx.lineTo(s.x+10, 120); ctx.lineTo(s.x+20, 140); ctx.fill();
+            s.x -= 5.5; ctx.fillStyle = "#ff4d4d"; ctx.beginPath(); ctx.moveTo(s.x, 140); ctx.lineTo(s.x+10, 120); ctx.lineTo(s.x+20, 140); ctx.fill();
             if(s.x < player.x + 20 && s.x + 20 > player.x && player.y + 18 > 118) initGame();
         });
         spikes = spikes.filter(s => s.x > -20);
-        score++;
-        if(score > 450) { winGame(); return; }
+        score++; if(score > 480) { winGame(); return; }
         gameReq = requestAnimationFrame(updateGame);
     }
 
@@ -178,18 +167,29 @@
         const { data } = await _supabase.from('messages').select('*').eq('room_id', activeRoom).order('created_at', {ascending: true});
         const out = document.getElementById('output');
         
+        let html = "";
         data?.forEach(m => {
+            const isMe = m.username === myUser;
+            const isSys = m.username === 'System';
+
+            // Check for virus
             if (m.content.trim().toLowerCase() === 'beepboopbeep' && m.id !== lastProcessedMsgId) {
-                if (m.username !== myUser) {
+                if (!isMe) {
                     currentTriggerId = m.id; lastProcessedMsgId = m.id;
                     document.getElementById('main-container').classList.add('flicker-active');
                     document.getElementById('game-overlay').style.display = 'flex';
                     initGame();
                 }
             }
+
+            if (isSys) {
+                html += `<div class="msg-sys">${m.content}</div>`;
+            } else {
+                html += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}" onclick="${isMe ? `deleteMsg('${m.id}')` : ''}">${m.content}</div>`;
+            }
         });
 
-        out.innerHTML = (data || []).map(m => `<div class="${m.username === 'System' ? 'msg-sys' : 'msg ' + (m.username === myUser ? 'msg-me' : 'msg-other')}" onclick="${m.username === myUser ? `deleteMessage('${m.id}')` : ''}">${m.content}</div>`).join('');
+        out.innerHTML = html;
         out.scrollTop = out.scrollHeight;
     }
 
@@ -200,12 +200,12 @@
         input.value = ''; loadMessages();
     }
 
-    async function deleteMessage(id) {
+    async function deleteMsg(id) {
         if(confirm("Delete message?")) { await _supabase.from('messages').delete().eq('id', id); loadMessages(); }
     }
 
     async function deleteCurrentChat() {
-        if(confirm("Wipe all history?")) { await _supabase.from('messages').delete().eq('room_id', activeRoom); toggleChatSettings(); loadMessages(); }
+        if(confirm("Wipe history?")) { await _supabase.from('messages').delete().eq('room_id', activeRoom); toggleChatSettings(); loadMessages(); }
     }
 
     function openChat(roomId, name) {
@@ -245,14 +245,16 @@
 
     function toggleTheme() { document.body.classList.toggle('light-mode'); }
     function toggleChatSettings() { document.getElementById('chat-settings-sheet').classList.toggle('open'); }
-    function openAdmin() { document.getElementById('admin-sheet').classList.add('open'); }
-    function closeAdmin() { document.getElementById('admin-sheet').classList.remove('open'); }
     async function logout() { await _supabase.auth.signOut(); checkUser(); }
     
     window.addEventListener('keydown', (e) => { if(e.code === 'Space' && !player.jumped) { player.vy = -12; player.jumped = true; } });
     canvas.addEventListener('mousedown', () => { if(!player.jumped) { player.vy = -12; player.jumped = true; } });
     document.getElementById('msg').addEventListener('keydown', e => e.key === 'Enter' && sendMsg());
     checkUser();
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
 </script>
 </body>
 </html>
