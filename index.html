@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pigeon Messenger Pro</title>
+    <title>Vault Chat Ultra</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary: #3ecf8e; --user-msg: #3b82f6; --bg: #0b0e11; --card: #1c2127; --input: #2d333b; --border: #444c56; --text: #adbac7; --header: #ffffff; }
@@ -29,12 +29,13 @@
         .msg { padding: 12px 16px; border-radius: 20px; max-width: 85%; font-size: 15px; position: relative; cursor: pointer; }
         .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 4px; }
         .msg-other { align-self: flex-start; background: var(--input); color: var(--header); border-bottom-left-radius: 4px; cursor: default; }
+        .msg img { max-width: 100%; border-radius: 12px; margin-top: 5px; display: block; }
         .time { font-size: 9px; opacity: 0.6; margin-top: 4px; display: block; text-align: right; }
         .msg-sys { align-self: center; font-size: 11px; opacity: 0.4; }
 
-        .new-badge { background: var(--primary); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 20px; font-weight: bold; margin-left: 8px; vertical-align: middle; }
+        .new-badge { background: var(--primary); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 20px; font-weight: bold; margin-left: 8px; }
 
-        #chat-settings-sheet, #admin-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; height: auto; background: var(--card); border-radius: 30px 30px 0 0; border-top: 1px solid var(--border); z-index: 100; padding: 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 -10px 40px rgba(0,0,0,0.4); }
+        #admin-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; height: auto; background: var(--card); border-radius: 30px 30px 0 0; border-top: 1px solid var(--border); z-index: 100; padding: 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 -10px 40px rgba(0,0,0,0.4); }
         .open { bottom: 0 !important; }
     </style>
 </head>
@@ -80,19 +81,13 @@
         <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:15px; border-bottom:1px solid var(--border);">
             <button onclick="closeChatWindow()" style="background:none; color:var(--text); border:none; font-size:20px;">←</button>
             <b id="chat-title" style="color:var(--header);">Chat</b>
-            <button onclick="toggleChatSettings()" style="background:none; color:var(--text); border:none; font-size:20px;">⚙️</button>
+            <button onclick="openAdmin()" style="background:none; color:var(--text); border:none; font-size:20px;">⚙️</button>
         </div>
         <div id="output"></div>
-        <div style="display:flex; gap:10px; padding-top:10px;">
-            <input type="text" id="msg" placeholder="Message...">
-            <button onclick="sendMsg()" style="width:60px;">➤</button>
+        <div style="display:flex; gap:8px; padding-top:10px;">
+            <input type="text" id="msg" placeholder="Type :yay for a meme...">
+            <button onclick="sendMsg()" style="width:50px;">➤</button>
         </div>
-    </div>
-
-    <div id="chat-settings-sheet">
-        <div style="width:40px; height:5px; background:var(--border); align-self:center; border-radius:10px;" onclick="toggleChatSettings()"></div>
-        <button class="btn-danger" onclick="deleteCurrentChat()">🗑️ Wipe Chat History</button>
-        <button class="btn-ghost" onclick="toggleChatSettings()">Close</button>
     </div>
 
     <div id="admin-sheet">
@@ -123,16 +118,6 @@
         document.getElementById(id).classList.add('active');
     }
 
-    function getDisplayDate(isoStr) {
-        const d = new Date(isoStr);
-        if (d.toDateString() === new Date().toDateString()) return "Today";
-        return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    }
-
-    function formatTime(isoStr) {
-        return new Date(isoStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-
     async function handleAuth(type) {
         const user = document.getElementById(`${type}-user`).value.trim();
         const pass = document.getElementById(`${type}-pass`).value;
@@ -155,39 +140,21 @@
     }
 
     async function loadChatHub() {
-        const { data } = await _supabase.from('messages').select('room_id, created_at, username').neq('room_id', null).order('created_at', {ascending: false});
-        
-        // Group by room and find latest message time
+        const { data } = await _supabase.from('messages').select('room_id, created_at').neq('room_id', null).order('created_at', {ascending: false});
         const roomsMap = {};
         (data || []).forEach(m => {
             if (m.room_id.includes(myUser)) {
                 if (!roomsMap[m.room_id]) roomsMap[m.room_id] = m.created_at;
             }
         });
-
         const list = document.getElementById('chat-list');
-        list.innerHTML = Object.keys(roomsMap).length ? '' : '<p style="text-align:center; opacity:0.3; margin-top:20px;">No chats found.</p>';
-        
+        list.innerHTML = Object.keys(roomsMap).length ? '' : '<p style="text-align:center; opacity:0.3; margin-top:20px;">No chats.</p>';
         for (const r in roomsMap) {
             const other = r.replace(myUser, '').replace('_', '');
             const lastViewed = localStorage.getItem(`viewed_${r}`) || 0;
             const hasNew = new Date(roomsMap[r]) > new Date(lastViewed);
-            
-            list.innerHTML += `
-                <div class="btn-ghost" onclick="openChat('${r}', '${other}')" style="margin-bottom:10px; padding:15px; display:flex; justify-content:space-between; align-items:center; width:100%; border-radius:18px;">
-                    <b>👤 ${other} ${hasNew ? '<span class="new-badge">NEW</span>' : ''}</b>
-                    <span>›</span>
-                </div>`;
+            list.innerHTML += `<div class="btn-ghost" onclick="openChat('${r}', '${other}')" style="margin-bottom:10px; padding:15px; display:flex; justify-content:space-between; width:100%; border-radius:18px;"><b>👤 ${other} ${hasNew ? '<span class="new-badge">● NEW</span>' : ''}</b><span>›</span></div>`;
         }
-    }
-
-    async function startNewChat() {
-        const target = document.getElementById('new-chat-user').value.trim();
-        if(!target || target === myUser) return;
-        const roomId = [myUser, target].sort().join('_');
-        await _supabase.from('messages').insert([{ content: 'Chat started.', username: 'System', room_id: roomId }]);
-        openChat(roomId, target);
-        document.getElementById('new-chat-user').value = '';
     }
 
     function openChat(roomId, name) {
@@ -210,72 +177,36 @@
 
     async function loadMessages() {
         if(!activeRoom) return;
-        const { data: ban } = await _supabase.from('banned_users').select('username').eq('username', myUser).single();
-        if(ban) { alert("Banned."); logout(); return; }
-
         const { data } = await _supabase.from('messages').select('*').eq('room_id', activeRoom).order('created_at', {ascending: true});
         const out = document.getElementById('output');
         const isAtBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 60;
 
-        let lastDate = "", html = "";
+        let html = "";
         (data || []).forEach(m => {
-            const msgDate = new Date(m.created_at).toDateString();
-            if (msgDate !== lastDate) {
-                html += `<div class="date-divider">${getDisplayDate(m.created_at)}</div>`;
-                lastDate = msgDate;
+            const isMe = m.username === myUser;
+            let content = m.content;
+            if(content.startsWith('IMAGE_URL:')) {
+                content = `<img src="${content.replace('IMAGE_URL:', '')}">`;
             }
-            if(m.username === 'System') html += `<div class="msg-sys">${m.content}</div>`;
-            else {
-                const isMe = m.username === myUser;
-                html += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}" ${isMe ? `onclick="deleteMessage('${m.id}')"` : ''}>${m.content}<span class="time">${formatTime(m.created_at)}</span></div>`;
-            }
+            html += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}">${content}</div>`;
         });
-
         out.innerHTML = html;
         if (isAtBottom) out.scrollTop = out.scrollHeight;
     }
 
     async function sendMsg() {
         const input = document.getElementById('msg');
-        if(!input.value.trim()) return;
-        await _supabase.from('messages').insert([{ content: input.value, username: myUser, room_id: activeRoom }]);
-        input.value = ''; loadMessages();
-    }
+        let text = input.value.trim();
+        if(!text) return;
 
-    async function deleteMessage(id) {
-        if(confirm("Delete message?")) { await _supabase.from('messages').delete().eq('id', id); loadMessages(); }
-    }
-
-    async function deleteCurrentChat() {
-        if(confirm("Delete all history?")) { 
-            await _supabase.from('messages').delete().eq('room_id', activeRoom);
-            toggleChatSettings(); loadMessages(); 
+        // Shortcut Logic
+        if(text === ':yay') {
+            text = "IMAGE_URL:https://i.imgflip.com/5ozp8n.jpg"; // Squid Game Celebration Meme
         }
-    }
 
-    function toggleChatSettings() { document.getElementById('chat-settings-sheet').classList.toggle('open'); }
-    function openAdmin() { document.getElementById('admin-sheet').classList.add('open'); }
-    function closeAdmin() { document.getElementById('admin-sheet').classList.remove('open'); }
-
-    async function loadBanList() {
-        const pw = document.getElementById('admin-pw').value;
-        const { data: isValid } = await _supabase.rpc('verify_admin_key', { provided_key: pw });
-        if(!isValid) return;
-        const { data: bans } = await _supabase.from('banned_users').select('*');
-        document.getElementById('ban-list-container').innerHTML = (bans || []).map(b => `<div style="display:flex; justify-content:space-between; margin:5px 0;"><span>${b.username}</span><button onclick="unbanUser('${b.username}')" style="padding:2px 8px;">X</button></div>`).join('');
-    }
-
-    async function unbanUser(u) { await _supabase.from('banned_users').delete().eq('username', u); loadBanList(); }
-
-    async function adminAction(action) {
-        const pw = document.getElementById('admin-pw').value;
-        const { data: isValid } = await _supabase.rpc('verify_admin_key', { provided_key: pw });
-        if(!isValid) return alert("Invalid Key");
-        if(action === 'banUser') {
-            const t = document.getElementById('ban-target').value.trim();
-            if(t) await _supabase.from('banned_users').insert([{ username: t }]);
-            loadBanList();
-        }
+        await _supabase.from('messages').insert([{ content: text, username: myUser, room_id: activeRoom }]);
+        input.value = ''; 
+        loadMessages();
     }
 
     function navTo(id) {
@@ -286,14 +217,19 @@
         if(id === 'settings-screen') document.getElementById('settings-username-display').innerText = myUser;
     }
 
-    function toggleTheme() {
-        document.body.classList.toggle('light-mode');
-        localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+    async function startNewChat() {
+        const target = document.getElementById('new-chat-user').value.trim();
+        if(!target || target === myUser) return;
+        const roomId = [myUser, target].sort().join('_');
+        await _supabase.from('messages').insert([{ content: 'Chat started.', username: 'System', room_id: roomId }]);
+        openChat(roomId, target);
     }
 
-    async function logout() { await _supabase.auth.signOut(); myUser = ""; checkUser(); }
+    function toggleTheme() { document.body.classList.toggle('light-mode'); }
+    function openAdmin() { document.getElementById('admin-sheet').classList.add('open'); }
+    function closeAdmin() { document.getElementById('admin-sheet').classList.remove('open'); }
+    async function logout() { await _supabase.auth.signOut(); checkUser(); }
     document.getElementById('msg').addEventListener('keydown', e => e.key === 'Enter' && sendMsg());
-    if(localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
     checkUser();
 </script>
 </body>
