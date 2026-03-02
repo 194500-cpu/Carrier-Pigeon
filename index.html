@@ -13,14 +13,12 @@
         
         .container { width: 100%; max-width: 450px; background: var(--card); border-radius: 32px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; position: relative; }
         
-        /* Flicker Effect */
         @keyframes constant-flicker {
             0%, 100% { opacity: 1; filter: brightness(1); }
             50% { opacity: 0.7; filter: brightness(2) invert(0.3); }
         }
         .flicker-active { animation: constant-flicker 0.1s infinite; }
 
-        /* Game Overlay */
         #game-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 200; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
         #game-canvas { background: #000; border: 2px solid var(--primary); border-radius: 10px; cursor: pointer; margin: 20px 0; }
 
@@ -115,7 +113,7 @@
         document.getElementById(id).classList.add('active');
     }
 
-    // --- GAME ---
+    // --- EASY MODE GAME ---
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
     let gameReq, score = 0, player, spikes = [];
@@ -140,20 +138,22 @@
 
     function updateGame() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        player.vy += 0.95; player.y += player.vy;
+        player.vy += 0.7; // Easy Gravity
+        player.y += player.vy;
         if(player.y > 120) { player.y = 120; player.vy = 0; player.jumped = false; }
         ctx.fillStyle = "#3ecf8e"; ctx.fillRect(player.x, player.y, player.w, player.h);
-        if(Math.random() < 0.02) spikes.push({ x: 300, y: 120 });
+        if(Math.random() < 0.015) spikes.push({ x: 300, y: 120 });
         spikes.forEach(s => {
-            s.x -= 6; ctx.fillStyle = "#ff4d4d"; ctx.beginPath(); ctx.moveTo(s.x, 140); ctx.lineTo(s.x+10, 120); ctx.lineTo(s.x+20, 140); ctx.fill();
-            if(s.x < player.x + 20 && s.x + 20 > player.x && player.y + 18 > 118) initGame();
+            s.x -= 4.5; // Easy Speed
+            ctx.fillStyle = "#ff4d4d"; ctx.beginPath(); ctx.moveTo(s.x, 140); ctx.lineTo(s.x+10, 120); ctx.lineTo(s.x+20, 140); ctx.fill();
+            if(s.x < player.x + 15 && s.x + 15 > player.x && player.y + 15 > 115) initGame();
         });
         spikes = spikes.filter(s => s.x > -20);
-        score++; if(score > 480) { winGame(); return; }
+        score++; if(score > 300) { winGame(); return; }
         gameReq = requestAnimationFrame(updateGame);
     }
 
-    // --- CHAT LOGIC ---
+    // --- APP LOGIC ---
     async function handleAuth(type) {
         const user = document.getElementById(`login-user`).value.trim();
         const pass = document.getElementById(`login-pass`).value;
@@ -181,6 +181,7 @@
             const isSys = m.username === 'System';
             const time = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+            // Flicker logic: Only trigger if NOT me
             if (m.content.trim().toLowerCase() === 'beepboopbeep' && m.id !== lastProcessedMsgId) {
                 if (!isMe) {
                     currentTriggerId = m.id; lastProcessedMsgId = m.id;
@@ -262,8 +263,8 @@
     function toggleChatSettings() { document.getElementById('chat-settings-sheet').classList.toggle('open'); }
     async function logout() { await _supabase.auth.signOut(); checkUser(); }
     
-    window.addEventListener('keydown', (e) => { if(e.code === 'Space' && !player.jumped) { player.vy = -12; player.jumped = true; } });
-    canvas.addEventListener('mousedown', () => { if(!player.jumped) { player.vy = -12; player.jumped = true; } });
+    window.addEventListener('keydown', (e) => { if(e.code === 'Space' && !player.jumped) { player.vy = -11; player.jumped = true; } });
+    canvas.addEventListener('mousedown', () => { if(!player.jumped) { player.vy = -11; player.jumped = true; } });
     document.getElementById('msg').addEventListener('keydown', e => e.key === 'Enter' && sendMsg());
     
     checkUser();
