@@ -15,31 +15,28 @@
         
         @keyframes constant-flicker {
             0%, 100% { opacity: 1; filter: brightness(1); }
-            50% { opacity: 0.7; filter: brightness(1.5) contrast(1.2); }
+            50% { opacity: 0.8; filter: contrast(1.5) sepia(0.5); }
         }
         .flicker-active { animation: constant-flicker 0.1s infinite; }
 
-        /* Undertale UI */
-        #game-overlay { display: none; position: absolute; inset: 0; background: #000; z-index: 200; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        #game-canvas { border: 4px solid white; background: #000; }
-        .ut-text { font-family: 'Courier New', Courier, monospace; color: white; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
+        /* Brawl Starsish UI */
+        #game-overlay { display: none; position: absolute; inset: 0; background: #1a1a1a; z-index: 200; flex-direction: column; align-items: center; justify-content: center; }
+        #game-canvas { border: 3px solid #555; background: #2c3e50; border-radius: 15px; touch-action: none; }
+        .stats-bar { width: 300px; display: flex; justify-content: space-between; color: white; font-weight: bold; margin-bottom: 10px; font-size: 12px; }
+
+        /* Attack Menu */
+        #attack-menu { position: absolute; bottom: -100%; left: 0; width: 100%; background: #222; padding: 25px; border-top: 3px solid var(--primary); z-index: 150; transition: 0.4s; border-radius: 25px 25px 0 0; }
+        #attack-menu.open { bottom: 0; }
 
         .screen { display: none; flex-direction: column; height: calc(100% - 65px); padding: 20px; }
         .active { display: flex; }
 
         input { background: var(--input); border: 1px solid var(--border); color: var(--header); padding: 16px; border-radius: 14px; outline: none; width: 100%; }
         button { border: none; padding: 16px; border-radius: 14px; font-weight: 600; cursor: pointer; background: var(--primary); color: #000; }
-        .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
-        .btn-danger { background: #ff4d4d !important; color: white !important; }
-
-        .nav-bar { position: absolute; bottom: 0; width: 100%; height: 65px; background: var(--card); display: flex; border-top: 1px solid var(--border); z-index: 10; }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; opacity: 0.5; font-weight: bold; }
-        .nav-item.active-nav { opacity: 1; color: var(--primary); }
-
-        #output { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 10px 0; }
-        .msg { padding: 12px 16px; border-radius: 20px; max-width: 80%; font-size: 15px; cursor: pointer; display: flex; flex-direction: column; }
-        .msg-time { font-size: 9px; opacity: 0.6; margin-top: 4px; }
         
+        #output { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 10px 0; }
+        .msg { padding: 12px 16px; border-radius: 20px; max-width: 80%; font-size: 15px; display: flex; flex-direction: column; }
+        .msg-time { font-size: 9px; opacity: 0.5; margin-top: 4px; }
         .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 4px; align-items: flex-end; }
         .msg-other { align-self: flex-start; background: var(--other-msg); color: var(--header); border-bottom-left-radius: 4px; align-items: flex-start; }
     </style>
@@ -48,9 +45,22 @@
 
 <div class="container" id="main-container">
     <div id="game-overlay">
-        <div class="ut-text">* Pigeon appears!</div>
-        <canvas id="game-canvas" width="200" height="200"></canvas>
-        <div class="ut-text" style="margin-top:20px; font-size: 12px;">HP: 20 / 20</div>
+        <div class="stats-bar">
+            <span style="color: #3498db;">YOU: <span id="p-hp">100</span></span>
+            <span style="color: #e74c3c;">ENEMY: <span id="e-hp">100</span></span>
+        </div>
+        <canvas id="game-canvas" width="320" height="400"></canvas>
+        <p style="color: white; font-size: 10px; margin-top: 10px;">WASD/Arrows to Move • Click to Shoot</p>
+    </div>
+
+    <div id="attack-menu">
+        <h3 style="color: white; margin-top: 0;">CHOOSE ATTACK</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button onclick="executeAttack('Trojan Pigeon')">Trojan Pigeon</button>
+            <button onclick="executeAttack('Brawl Hijack')" style="background: #e67e22;">Brawl Hijack</button>
+            <button onclick="executeAttack('Ghost Signal')" style="background: #9b59b6;">Ghost Signal</button>
+            <button onclick="cancelAttack()" class="btn-ghost" style="color: white;">Cancel</button>
+        </div>
     </div>
 
     <div id="login-screen" class="screen active" style="justify-content:center; gap:15px;">
@@ -62,10 +72,6 @@
 
     <div id="home-screen" class="screen">
         <h2>Pigeon Coop</h2>
-        <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <input type="text" id="new-chat-user" placeholder="Target Pigeon...">
-            <button onclick="startNewChat()" style="width:60px;">+</button>
-        </div>
         <div id="chat-list" style="overflow-y:auto; flex:1;"></div>
     </div>
 
@@ -77,12 +83,12 @@
         <div id="output"></div>
         <div style="display:flex; gap:8px; padding-top:10px;">
             <input type="text" id="msg" placeholder="Send a pigeon...">
-            <button onclick="sendMsg()" style="width:50px;">➤</button>
+            <button onclick="checkInputAndSend()" style="width:50px;">➤</button>
         </div>
     </div>
 
     <div class="nav-bar" id="bottom-nav" style="display:none">
-        <div class="nav-item active-nav" onclick="navTo('home-screen')">PIGEONS</div>
+        <div class="nav-item" onclick="navTo('home-screen')">PIGEONS</div>
     </div>
 </div>
 
@@ -92,19 +98,61 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let myUser = "", activeRoom = "", chatInterval = null, lastProcessedMsgId = null, currentTriggerId = null;
 
-    // --- UNDERTALE BATTLE ---
+    // --- BRAWL 1v1 ENGINE ---
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
-    let gameReq, score = 0, heart = { x: 90, y: 90, size: 10 }, bullets = [], keys = {};
+    let gameReq, player, enemy, bullets = [], enemyBullets = [], keys = {};
 
-    function initBattle() {
-        score = 0; bullets = [];
-        heart = { x: 90, y: 90, size: 10 };
+    function initBrawl() {
+        player = { x: 160, y: 350, hp: 100, color: '#3498db' };
+        enemy = { x: 160, y: 50, hp: 100, color: '#e74c3c', vx: 2 };
+        bullets = []; enemyBullets = [];
         if (gameReq) cancelAnimationFrame(gameReq);
-        updateBattle();
+        updateBrawl();
     }
 
-    async function winBattle() {
+    function updateBrawl() {
+        ctx.clearRect(0, 0, 320, 400);
+        
+        // Player Movement
+        if ((keys['ArrowLeft'] || keys['a']) && player.x > 15) player.x -= 3;
+        if ((keys['ArrowRight'] || keys['d']) && player.x < 305) player.x += 3;
+        if ((keys['ArrowUp'] || keys['w']) && player.y > 200) player.y -= 3;
+        if ((keys['ArrowDown'] || keys['s']) && player.y < 385) player.y += 3;
+
+        // Enemy AI
+        enemy.x += enemy.vx;
+        if (enemy.x > 300 || enemy.x < 20) enemy.vx *= -1;
+        if (Math.random() < 0.03) enemyBullets.push({ x: enemy.x, y: enemy.y, vy: 5 });
+
+        // Draw Entities
+        ctx.fillStyle = player.color; ctx.beginPath(); ctx.arc(player.x, player.y, 15, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = enemy.color; ctx.beginPath(); ctx.arc(enemy.x, enemy.y, 15, 0, Math.PI*2); ctx.fill();
+
+        // Player Bullets
+        bullets.forEach((b, i) => {
+            b.y -= 7; ctx.fillStyle = "yellow"; ctx.fillRect(b.x-2, b.y, 4, 10);
+            if (Math.hypot(b.x - enemy.x, b.y - enemy.y) < 20) {
+                enemy.hp -= 5; bullets.splice(i, 1);
+            }
+        });
+        // Enemy Bullets
+        enemyBullets.forEach((b, i) => {
+            b.y += 5; ctx.fillStyle = "orange"; ctx.fillRect(b.x-2, b.y, 4, 10);
+            if (Math.hypot(b.x - player.x, b.y - player.y) < 20) {
+                player.hp -= 10; enemyBullets.splice(i, 1);
+            }
+        });
+
+        document.getElementById('p-hp').innerText = player.hp;
+        document.getElementById('e-hp').innerText = enemy.hp;
+
+        if (player.hp <= 0) initBrawl();
+        if (enemy.hp <= 0) winBrawl();
+        else gameReq = requestAnimationFrame(updateBrawl);
+    }
+
+    async function winBrawl() {
         document.getElementById('game-overlay').style.display = 'none';
         document.getElementById('main-container').classList.remove('flicker-active');
         cancelAnimationFrame(gameReq);
@@ -114,39 +162,29 @@
         }
     }
 
-    function updateBattle() {
-        ctx.fillStyle = "black"; ctx.fillRect(0, 0, 200, 200);
-        
-        // Move Heart
-        if (keys['ArrowUp'] && heart.y > 0) heart.y -= 3;
-        if (keys['ArrowDown'] && heart.y < 190) heart.y += 3;
-        if (keys['ArrowLeft'] && heart.x > 0) heart.x -= 3;
-        if (keys['ArrowRight'] && heart.x < 190) heart.x += 3;
-
-        // Draw Heart
-        ctx.fillStyle = "red"; ctx.fillRect(heart.x, heart.y, heart.size, heart.size);
-
-        // Bullets
-        if (Math.random() < 0.08) bullets.push({ x: Math.random() * 200, y: -10, vy: 2 + Math.random() * 2 });
-        
-        bullets.forEach((b, i) => {
-            b.y += b.vy;
-            ctx.fillStyle = "white"; ctx.fillRect(b.x, b.y, 5, 15);
-            // Collision
-            if (b.x < heart.x + 10 && b.x + 5 > heart.x && b.y < heart.y + 10 && b.y + 15 > heart.y) initBattle();
-        });
-
-        bullets = bullets.filter(b => b.y < 200);
-        score++;
-        if (score > 400) { winBattle(); return; }
-        gameReq = requestAnimationFrame(updateBattle);
+    // --- APP CORE ---
+    function checkInputAndSend() {
+        const val = document.getElementById('msg').value.trim().toLowerCase();
+        if (val === 'beepboopbeep') {
+            document.getElementById('attack-menu').classList.add('open');
+        } else {
+            sendMsg();
+        }
     }
 
-    // --- APP LOGIC ---
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+    async function executeAttack(type) {
+        document.getElementById('attack-menu').classList.remove('open');
+        await _supabase.from('messages').insert([{ 
+            content: 'beepboopbeep', 
+            username: myUser, 
+            room_id: activeRoom,
+            metadata: { attack_type: type }
+        }]);
+        document.getElementById('msg').value = '';
+        loadMessages();
     }
+
+    function cancelAttack() { document.getElementById('attack-menu').classList.remove('open'); }
 
     async function handleAuth() {
         const user = document.getElementById('login-user').value.trim();
@@ -178,20 +216,14 @@
                 currentTriggerId = m.id; lastProcessedMsgId = m.id;
                 document.getElementById('main-container').classList.add('flicker-active');
                 document.getElementById('game-overlay').style.display = 'flex';
-                initBattle();
+                initBrawl();
             }
 
-            // Hide trigger messages from UI
             if (!isTrigger) {
                 const dateObj = new Date(m.created_at);
                 const dateStr = dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' });
                 const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                
-                html += `
-                <div class="msg ${isMe ? 'msg-me' : 'msg-other'}">
-                    ${m.content}
-                    <span class="msg-time">${dateStr}, ${timeStr}</span>
-                </div>`;
+                html += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}">${m.content}<span class="msg-time">${dateStr}, ${timeStr}</span></div>`;
             }
         });
         out.innerHTML = html;
@@ -208,24 +240,21 @@
     function openChat(roomId, name) {
         activeRoom = roomId;
         document.getElementById('chat-title').innerText = name.replace(myUser, '').replace('_', '');
-        showScreen('chat-window');
+        document.getElementById('chat-window').classList.add('active');
         if (chatInterval) clearInterval(chatInterval);
         chatInterval = setInterval(loadMessages, 3000);
         loadMessages();
     }
 
     function closeChatWindow() {
-        showScreen('home-screen');
+        document.getElementById('chat-window').classList.remove('active');
         activeRoom = ""; clearInterval(chatInterval);
     }
 
     async function loadChatHub() {
         const { data } = await _supabase.from('messages').select('room_id').neq('room_id', null);
         const list = [...new Set(data.map(d => d.room_id))].filter(r => r && r.includes(myUser));
-        document.getElementById('chat-list').innerHTML = list.map(r => `
-            <button class="btn-ghost" onclick="openChat('${r}', '${r}')" style="width:100%; margin-bottom:10px; text-align:left; padding:15px;">
-                🐦 Pigeon: ${r.replace(myUser, '').replace('_', '')}
-            </button>`).join('');
+        document.getElementById('chat-list').innerHTML = list.map(r => `<button onclick="openChat('${r}', '${r}')" style="width:100%; margin-bottom:10px; background:var(--input); color:var(--text); text-align:left;">🐦 Pigeon: ${r.replace(myUser, '').replace('_', '')}</button>`).join('');
     }
 
     function navTo(id) {
@@ -233,17 +262,17 @@
         if (id === 'home-screen') loadChatHub();
     }
 
-    async function startNewChat() {
-        const target = document.getElementById('new-chat-user').value.trim();
-        if (!target || target === myUser) return;
-        const roomId = [myUser, target].sort().join('_');
-        await _supabase.from('messages').insert([{ content: 'Chat started.', username: 'System', room_id: roomId }]);
-        openChat(roomId, target);
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
     }
 
     window.addEventListener('keydown', e => keys[e.key] = true);
     window.addEventListener('keyup', e => keys[e.key] = false);
-    document.getElementById('msg').addEventListener('keydown', e => e.key === 'Enter' && sendMsg());
+    canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        bullets.push({ x: player.x, y: player.y });
+    });
     
     checkUser();
 </script>
