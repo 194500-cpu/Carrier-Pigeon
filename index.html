@@ -25,17 +25,19 @@
         .nav-item.active-nav { opacity: 1; color: var(--primary); }
 
         #output { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 10px 0; scroll-behavior: smooth; }
-        .date-divider { align-self: center; font-size: 10px; font-weight: 700; opacity: 0.5; margin: 15px 0; background: var(--input); padding: 4px 12px; border-radius: 10px; text-transform: uppercase; }
-        .msg { padding: 12px 16px; border-radius: 20px; max-width: 85%; font-size: 15px; position: relative; cursor: pointer; }
+        .msg { padding: 12px 16px; border-radius: 20px; max-width: 85%; font-size: 15px; position: relative; }
         .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 4px; }
-        .msg-other { align-self: flex-start; background: var(--input); color: var(--header); border-bottom-left-radius: 4px; cursor: default; }
+        .msg-other { align-self: flex-start; background: var(--input); color: var(--header); border-bottom-left-radius: 4px; }
         .time { font-size: 9px; opacity: 0.6; margin-top: 4px; display: block; text-align: right; }
-        .msg-sys { align-self: center; font-size: 11px; opacity: 0.4; }
-
-        .new-badge { background: var(--primary); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 20px; font-weight: bold; margin-left: 8px; vertical-align: middle; }
 
         #chat-settings-sheet, #admin-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; height: auto; background: var(--card); border-radius: 30px 30px 0 0; border-top: 1px solid var(--border); z-index: 100; padding: 25px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 -10px 40px rgba(0,0,0,0.4); }
         .open { bottom: 0 !important; }
+
+        /* Participants Side Panel Styles */
+        .side-panel { position: absolute; top: 0; right: -100%; width: 80%; height: calc(100% - 65px); background: var(--card); border-left: 1px solid var(--border); z-index: 150; padding: 25px; transition: 0.3s ease; box-shadow: -10px 0 30px rgba(0,0,0,0.4); }
+        .side-panel.panel-open { right: 0; }
+        .participant-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--input); border-radius: 12px; margin-bottom: 8px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
     </style>
 </head>
 <body>
@@ -60,7 +62,7 @@
     <div id="home-screen" class="screen">
         <h2 style="color:var(--header); margin-top:0;">Messages</h2>
         <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <input type="text" id="new-chat-user" placeholder="Target Username...">
+            <input type="text" id="new-chat-user" placeholder="Target User(s)...">
             <button onclick="startNewChat()" style="width:60px;">+</button>
         </div>
         <div id="chat-list" style="overflow-y:auto; flex:1;"></div>
@@ -76,17 +78,29 @@
         <button class="btn-danger" onclick="logout()" style="margin-top:auto;">Sign Out</button>
     </div>
 
-    <div id="chat-window" class="screen" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:50; background:var(--card);">
+    <div id="chat-window" class="screen" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:50; background:var(--card); display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:15px; border-bottom:1px solid var(--border);">
             <button onclick="closeChatWindow()" style="background:none; color:var(--text); border:none; font-size:20px;">←</button>
             <b id="chat-title" style="color:var(--header);">Chat</b>
-            <button onclick="toggleChatSettings()" style="background:none; color:var(--text); border:none; font-size:20px;">⚙️</button>
+            <div style="display:flex; gap:10px;">
+                <button onclick="toggleParticipants()" style="background:none; color:var(--text); border:none; font-size:20px;">👥</button>
+                <button onclick="toggleChatSettings()" style="background:none; color:var(--text); border:none; font-size:20px;">⚙️</button>
+            </div>
         </div>
         <div id="output"></div>
         <div style="display:flex; gap:10px; padding-top:10px;">
             <input type="text" id="msg" placeholder="Message...">
             <button onclick="sendMsg()" style="width:60px;">➤</button>
         </div>
+    </div>
+
+    <!-- Participants Side Panel -->
+    <div id="participants-panel" class="side-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 style="color:var(--header); margin:0;">Members</h3>
+            <button onclick="toggleParticipants()" style="background:none; border:none; color:var(--text); font-size:24px; cursor:pointer;">×</button>
+        </div>
+        <div id="participants-list" style="overflow-y:auto; flex:1;"></div>
     </div>
 
     <div id="chat-settings-sheet">
@@ -114,187 +128,182 @@
 
 <script>
     const SUPABASE_URL = 'https://qlfdggzilndvtbyfqbdb.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsZmRnZ3ppbG5kdnRieWZxYmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNDUwOTgsImV4cCI6MjA4NzYyMTA5OH0.XlzFZSAimDc2SxEAwGn18wqEtDF3mqzYe6nW93OzZpU';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsZmRnZ3ppbG5kdnRieWZxYmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNDUwOTgsImV4cCI6MjA4NzYyMTA5OH0.XlzFZSA';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    let myUser = "", activeRoom = "", chatInterval = null;
+
+    let currentUser = null;
+    let currentChatID = null;
+    let currentParticipants = [];
+    let messageSubscription = null;
+
+    window.onload = () => {
+        const saved = localStorage.getItem('v_user');
+        if (saved) { currentUser = JSON.parse(saved); loginSuccess(); }
+        if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+    };
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
 
-    function getDisplayDate(isoStr) {
-        const d = new Date(isoStr);
-        if (d.toDateString() === new Date().toDateString()) return "Today";
-        return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    }
-
-    function formatTime(isoStr) {
-        return new Date(isoStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-
-    async function handleAuth(type) {
-        const user = document.getElementById(`${type}-user`).value.trim();
-        const pass = document.getElementById(`${type}-pass`).value;
-        const { data: ban } = await _supabase.from('banned_users').select('username').eq('username', user).single();
-        if(ban) return alert("Banned.");
-        const { error } = await (type === 'login' ? _supabase.auth.signInWithPassword({email: user+'@chat.com', password: pass}) : _supabase.auth.signUp({email: user+'@chat.com', password: pass}));
-        if (error) alert(error.message); else checkUser();
-    }
-
-    async function checkUser() {
-        const { data: { user } } = await _supabase.auth.getUser();
-        if (user) {
-            myUser = user.email.split('@')[0];
-            document.getElementById('bottom-nav').style.display = 'flex';
-            navTo('home-screen');
-        } else {
-            document.getElementById('bottom-nav').style.display = 'none';
-            showScreen('login-screen');
-        }
-    }
-
-    async function loadChatHub() {
-        const { data } = await _supabase.from('messages').select('room_id, created_at, username').neq('room_id', null).order('created_at', {ascending: false});
-        
-        // Group by room and find latest message time
-        const roomsMap = {};
-        (data || []).forEach(m => {
-            if (m.room_id.includes(myUser)) {
-                if (!roomsMap[m.room_id]) roomsMap[m.room_id] = m.created_at;
-            }
-        });
-
-        const list = document.getElementById('chat-list');
-        list.innerHTML = Object.keys(roomsMap).length ? '' : '<p style="text-align:center; opacity:0.3; margin-top:20px;">No chats found.</p>';
-        
-        for (const r in roomsMap) {
-            const other = r.replace(myUser, '').replace('_', '');
-            const lastViewed = localStorage.getItem(`viewed_${r}`) || 0;
-            const hasNew = new Date(roomsMap[r]) > new Date(lastViewed);
-            
-            list.innerHTML += `
-                <div class="btn-ghost" onclick="openChat('${r}', '${other}')" style="margin-bottom:10px; padding:15px; display:flex; justify-content:space-between; align-items:center; width:100%; border-radius:18px;">
-                    <b>👤 ${other} ${hasNew ? '<span class="new-badge">NEW</span>' : ''}</b>
-                    <span>›</span>
-                </div>`;
-        }
-    }
-
-    async function startNewChat() {
-        const target = document.getElementById('new-chat-user').value.trim();
-        if(!target || target === myUser) return;
-        const roomId = [myUser, target].sort().join('_');
-        await _supabase.from('messages').insert([{ content: 'Chat started.', username: 'System', room_id: roomId }]);
-        openChat(roomId, target);
-        document.getElementById('new-chat-user').value = '';
-    }
-
-    function openChat(roomId, name) {
-        activeRoom = roomId;
-        localStorage.setItem(`viewed_${roomId}`, new Date().toISOString());
-        document.getElementById('chat-title').innerText = name;
-        document.getElementById('chat-window').classList.add('active');
-        loadMessages();
-        if(chatInterval) clearInterval(chatInterval);
-        chatInterval = setInterval(loadMessages, 3000);
-    }
-
-    function closeChatWindow() {
-        if(activeRoom) localStorage.setItem(`viewed_${activeRoom}`, new Date().toISOString());
-        document.getElementById('chat-window').classList.remove('active');
-        activeRoom = "";
-        clearInterval(chatInterval);
-        loadChatHub();
-    }
-
-    async function loadMessages() {
-        if(!activeRoom) return;
-        const { data: ban } = await _supabase.from('banned_users').select('username').eq('username', myUser).single();
-        if(ban) { alert("Banned."); logout(); return; }
-
-        const { data } = await _supabase.from('messages').select('*').eq('room_id', activeRoom).order('created_at', {ascending: true});
-        const out = document.getElementById('output');
-        const isAtBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 60;
-
-        let lastDate = "", html = "";
-        (data || []).forEach(m => {
-            const msgDate = new Date(m.created_at).toDateString();
-            if (msgDate !== lastDate) {
-                html += `<div class="date-divider">${getDisplayDate(m.created_at)}</div>`;
-                lastDate = msgDate;
-            }
-            if(m.username === 'System') html += `<div class="msg-sys">${m.content}</div>`;
-            else {
-                const isMe = m.username === myUser;
-                html += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}" ${isMe ? `onclick="deleteMessage('${m.id}')"` : ''}>${m.content}<span class="time">${formatTime(m.created_at)}</span></div>`;
-            }
-        });
-
-        out.innerHTML = html;
-        if (isAtBottom) out.scrollTop = out.scrollHeight;
-    }
-
-    async function sendMsg() {
-        const input = document.getElementById('msg');
-        if(!input.value.trim()) return;
-        await _supabase.from('messages').insert([{ content: input.value, username: myUser, room_id: activeRoom }]);
-        input.value = ''; loadMessages();
-    }
-
-    async function deleteMessage(id) {
-        if(confirm("Delete message?")) { await _supabase.from('messages').delete().eq('id', id); loadMessages(); }
-    }
-
-    async function deleteCurrentChat() {
-        if(confirm("Delete all history?")) { 
-            await _supabase.from('messages').delete().eq('room_id', activeRoom);
-            toggleChatSettings(); loadMessages(); 
-        }
-    }
-
-    function toggleChatSettings() { document.getElementById('chat-settings-sheet').classList.toggle('open'); }
-    function openAdmin() { document.getElementById('admin-sheet').classList.add('open'); }
-    function closeAdmin() { document.getElementById('admin-sheet').classList.remove('open'); }
-
-    async function loadBanList() {
-        const pw = document.getElementById('admin-pw').value;
-        const { data: isValid } = await _supabase.rpc('verify_admin_key', { provided_key: pw });
-        if(!isValid) return;
-        const { data: bans } = await _supabase.from('banned_users').select('*');
-        document.getElementById('ban-list-container').innerHTML = (bans || []).map(b => `<div style="display:flex; justify-content:space-between; margin:5px 0;"><span>${b.username}</span><button onclick="unbanUser('${b.username}')" style="padding:2px 8px;">X</button></div>`).join('');
-    }
-
-    async function unbanUser(u) { await _supabase.from('banned_users').delete().eq('username', u); loadBanList(); }
-
-    async function adminAction(action) {
-        const pw = document.getElementById('admin-pw').value;
-        const { data: isValid } = await _supabase.rpc('verify_admin_key', { provided_key: pw });
-        if(!isValid) return alert("Invalid Key");
-        if(action === 'banUser') {
-            const t = document.getElementById('ban-target').value.trim();
-            if(t) await _supabase.from('banned_users').insert([{ username: t }]);
-            loadBanList();
-        }
-    }
-
     function navTo(id) {
         showScreen(id);
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
-        document.getElementById('nav-' + id.split('-')[0]).classList.add('active-nav');
-        if(id === 'home-screen') loadChatHub();
-        if(id === 'settings-screen') document.getElementById('settings-username-display').innerText = myUser;
+        const navId = id === 'home-screen' ? 'nav-home' : 'nav-settings';
+        document.getElementById(navId).classList.add('active-nav');
     }
 
+    async function handleAuth(type) {
+        const user = document.getElementById(type + '-user').value.trim().toLowerCase();
+        const pass = document.getElementById(type + '-pass').value;
+        if (!user || !pass) return alert("Fill all fields");
+
+        if (type === 'signup') {
+            const { error } = await _supabase.from('users').insert([{ username: user, password: pass }]);
+            if (error) return alert("Username taken");
+            alert("Success! Sign in now.");
+            showScreen('login-screen');
+        } else {
+            const { data } = await _supabase.from('users').select('*').eq('username', user).eq('password', pass).single();
+            if (data) {
+                if (data.is_banned) return alert("Account banned.");
+                currentUser = data;
+                localStorage.setItem('v_user', JSON.stringify(data));
+                loginSuccess();
+            } else alert("Invalid credentials");
+        }
+    }
+
+    function loginSuccess() {
+        showScreen('home-screen');
+        document.getElementById('bottom-nav').style.display = 'flex';
+        document.getElementById('settings-username-display').innerText = currentUser.username;
+        loadChatList();
+    }
+
+    function logout() { localStorage.removeItem('v_user'); location.reload(); }
     function toggleTheme() {
         document.body.classList.toggle('light-mode');
         localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
     }
 
-    async function logout() { await _supabase.auth.signOut(); myUser = ""; checkUser(); }
-    document.getElementById('msg').addEventListener('keydown', e => e.key === 'Enter' && sendMsg());
-    if(localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
-    checkUser();
+    async function startNewChat() {
+        const input = document.getElementById('new-chat-user').value.trim();
+        if (!input) return;
+        const targets = input.split(',').map(u => u.trim().toLowerCase()).filter(u => u !== "");
+        const isGroup = targets.length > 1;
+        let chatName = "";
+        if (isGroup) {
+            chatName = prompt("Group Name:", "New Group");
+            if (!chatName) return;
+        }
+        const participants = [...new Set([...targets, currentUser.username.toLowerCase()])];
+        const { error } = await _supabase.from('chats').insert([{ 
+            participants: participants, 
+            is_group: isGroup, 
+            group_name: isGroup ? chatName : null 
+        }]);
+        if (error) alert("Error: " + error.message);
+        else { document.getElementById('new-chat-user').value = ''; loadChatList(); }
+    }
+
+    async function loadChatList() {
+        const { data } = await _supabase.from('chats').select('*').contains('participants', [currentUser.username.toLowerCase()]);
+        const list = document.getElementById('chat-list');
+        list.innerHTML = '';
+        if (data) data.forEach(chat => {
+            const div = document.createElement('div');
+            div.style.cssText = "background:var(--input); padding:18px; margin-bottom:12px; border-radius:18px; cursor:pointer;";
+            let name = chat.is_group ? "👥 " + chat.group_name : chat.participants.find(p => p !== currentUser.username);
+            div.innerHTML = `<b>${name}</b>`;
+            div.onclick = () => openChat(chat.id, name);
+            list.appendChild(div);
+        });
+    }
+
+    async function openChat(id, title) {
+        currentChatID = id;
+        document.getElementById('chat-title').innerText = title;
+        document.getElementById('chat-window').style.display = 'flex';
+        document.getElementById('output').innerHTML = '';
+        
+        // Fetch specific participants for this chat
+        const { data } = await _supabase.from('chats').select('participants').eq('id', id).single();
+        if (data) currentParticipants = data.participants;
+
+        loadMessages();
+        subscribeToMessages();
+    }
+
+    function closeChatWindow() {
+        document.getElementById('chat-window').style.display = 'none';
+        document.getElementById('participants-panel').classList.remove('panel-open');
+        if (messageSubscription) _supabase.removeChannel(messageSubscription);
+    }
+
+    function toggleParticipants() {
+        const panel = document.getElementById('participants-panel');
+        panel.classList.toggle('panel-open');
+        if (panel.classList.contains('panel-open')) renderParticipants();
+    }
+
+    function renderParticipants() {
+        const list = document.getElementById('participants-list');
+        list.innerHTML = '';
+        currentParticipants.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'participant-item';
+            div.innerHTML = `<div class="status-dot"></div><span>${p}</span>${p === currentUser.username ? ' <small style="opacity:0.5">(You)</small>' : ''}`;
+            list.appendChild(div);
+        });
+    }
+
+    async function loadMessages() {
+        const { data } = await _supabase.from('messages').select('*').eq('chat_id', currentChatID).order('created_at', { ascending: true });
+        if (data) data.forEach(renderMsg);
+    }
+
+    function subscribeToMessages() {
+        messageSubscription = _supabase.channel('room-' + currentChatID)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `chat_id=eq.${currentChatID}` }, 
+            payload => renderMsg(payload.new)).subscribe();
+    }
+
+    async function sendMsg() {
+        const text = document.getElementById('msg').value.trim();
+        if (!text) return;
+        await _supabase.from('messages').insert([{ chat_id: currentChatID, sender: currentUser.username, content: text }]);
+        document.getElementById('msg').value = '';
+    }
+
+    function renderMsg(m) {
+        const out = document.getElementById('output');
+        const isMe = m.sender === currentUser.username;
+        const div = document.createElement('div');
+        div.className = `msg ${isMe ? 'msg-me' : 'msg-other'}`;
+        div.innerHTML = `<small style="display:block;opacity:0.5;font-size:10px">${m.sender}</small>${m.content}<span class="time">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
+        out.appendChild(div);
+        out.scrollTop = out.scrollHeight;
+    }
+
+    function toggleChatSettings() { document.getElementById('chat-settings-sheet').classList.toggle('open'); }
+    async function deleteCurrentChat() {
+        if (confirm("Wipe all chat history for everyone?")) {
+            await _supabase.from('messages').delete().eq('chat_id', currentChatID);
+            document.getElementById('output').innerHTML = '';
+            toggleChatSettings();
+        }
+    }
+    function openAdmin() { document.getElementById('admin-sheet').classList.add('open'); }
+    function closeAdmin() { document.getElementById('admin-sheet').classList.remove('open'); }
+    async function adminAction(action) {
+        const pw = document.getElementById('admin-pw').value;
+        const target = document.getElementById('ban-target').value.toLowerCase();
+        if (pw !== 'SECRET123') return alert("Wrong key");
+        await _supabase.from('users').update({ is_banned: true }).eq('username', target);
+        alert("Banned " + target);
+    }
 </script>
 </body>
 </html>
