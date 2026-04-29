@@ -19,7 +19,7 @@
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; opacity: 0.5; }
         .active-nav { opacity: 1; color: var(--primary); }
         #output { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 10px 0; }
-        .msg { padding: 10px 14px; border-radius: 18px; max-width: 80%; font-size: 14px; line-height: 1.4; }
+        .msg { padding: 10px 14px; border-radius: 18px; max-width: 80%; font-size: 14px; }
         .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 4px; }
         .msg-other { align-self: flex-start; background: var(--input); color: var(--header); border-bottom-left-radius: 4px; }
     </style>
@@ -31,124 +31,111 @@
         <h2 style="text-align:center;">Vault Chat</h2>
         <input type="text" id="l-u" placeholder="Username">
         <input type="password" id="l-p" placeholder="Password">
-        <button onclick="auth('login')">Sign In</button>
-        <p onclick="showScreen('signup-screen')" style="text-align:center; font-size:13px; cursor:pointer; opacity:0.7; margin-top:15px;">Create Account</p>
+        <button onclick="window.auth('login')">Sign In</button>
+        <p onclick="window.showScreen('signup-screen')" style="text-align:center; font-size:13px; cursor:pointer; opacity:0.7; margin-top:15px;">Create Account</p>
     </div>
 
     <div id="signup-screen" class="screen" style="justify-content:center;">
         <h2>Register</h2>
         <input type="text" id="s-u" placeholder="Username">
         <input type="password" id="s-p" placeholder="Password">
-        <button onclick="auth('signup')">Sign Up</button>
-        <p onclick="showScreen('login-screen')" style="text-align:center; font-size:13px; cursor:pointer; opacity:0.7; margin-top:15px;">Back to Login</p>
+        <button onclick="window.auth('signup')">Sign Up</button>
+        <p onclick="window.showScreen('login-screen')" style="text-align:center; font-size:13px; cursor:pointer; opacity:0.7; margin-top:15px;">Back to Login</p>
     </div>
 
     <div id="home-screen" class="screen">
         <h3>Chats</h3>
         <div style="display:flex; gap:8px;">
             <input type="text" id="new-u" placeholder="Username(s)..." style="margin:0;">
-            <button onclick="startChat()" style="width:50px;">+</button>
+            <button onclick="window.startChat()" style="width:50px;">+</button>
         </div>
         <div id="chat-list" style="margin-top:15px; overflow-y:auto;"></div>
     </div>
 
     <div id="settings-screen" class="screen">
         <h3>Settings</h3>
-        <button onclick="logout()" style="background:#ff4d4d; color:white;">Sign Out</button>
+        <button onclick="window.logout()" style="background:#ff4d4d; color:white;">Sign Out</button>
     </div>
 
     <div id="chat-window" class="screen" style="position:absolute; inset:0; z-index:100; background:var(--card); display:none;">
         <div style="display:flex; align-items:center; gap:15px; padding-bottom:10px; border-bottom:1px solid var(--border);">
-            <span onclick="closeChat()" style="cursor:pointer; font-size:20px;">←</span>
+            <span onclick="window.closeChat()" style="cursor:pointer; font-size:20px;">←</span>
             <b id="c-t">Chat</b>
         </div>
         <div id="output"></div>
         <div style="display:flex; gap:8px; padding-top:10px;">
             <input type="text" id="m-i" placeholder="Message..." style="margin:0;">
-            <button onclick="send()" style="width:50px;">➤</button>
+            <button onclick="window.send()" style="width:50px;">➤</button>
         </div>
     </div>
 
     <div class="nav-bar" id="nb">
-        <div class="nav-item active-nav" id="n-h" onclick="nav('home-screen')">CHATS</div>
-        <div class="nav-item" id="n-s" onclick="nav('settings-screen')">SETTINGS</div>
+        <div class="nav-item active-nav" id="n-h" onclick="window.nav('home-screen')">CHATS</div>
+        <div class="nav-item" id="n-s" onclick="window.nav('settings-screen')">SETTINGS</div>
     </div>
 </div>
 
 <script>
-    // 1. INITIALIZE IMMEDIATELY
     const S_URL = 'https://supabase.co';
     const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsZmRnZ3ppbG5kdnRieWZxYmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNDUwOTgsImV4cCI6MjA4NzYyMTA5OH0.XlzFZSA';
-    const supabaseClient = supabase.createClient(S_URL, S_KEY);
+    const client = supabase.createClient(S_URL, S_KEY);
 
     let user = null, curParts = [], channel = null;
 
-    // 2. RUN APP
     window.onload = () => {
         const cached = localStorage.getItem('v_u');
-        if (cached) { 
-            user = JSON.parse(cached); 
-            loginOk(); 
-        }
+        if (cached) { user = JSON.parse(cached); loginOk(); }
     };
 
-    function showScreen(id) {
+    // EXPLICIT GLOBAL MAPPING
+    window.showScreen = (id) => {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-    }
+    };
 
-    function nav(id) {
-        showScreen(id);
+    window.nav = (id) => {
+        window.showScreen(id);
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
         document.getElementById(id === 'home-screen' ? 'n-h' : 'n-s').classList.add('active-nav');
-    }
+    };
 
-    async function auth(type) {
+    window.auth = async (type) => {
         const u = document.getElementById(type === 'login' ? 'l-u' : 's-u').value.toLowerCase().trim();
         const p = document.getElementById(type === 'login' ? 'l-p' : 's-p').value;
-        
         if (!u || !p) return alert("Fill fields");
 
         if (type === 'signup') {
-            const { error } = await supabaseClient.from('users').insert([{ username: u, password: p }]);
+            const { error } = await client.from('users').insert([{ username: u, password: p }]);
             if (error) return alert("User exists");
-            alert("Done! Sign in."); 
-            showScreen('login-screen');
+            alert("Done! Sign in."); window.showScreen('login-screen');
         } else {
-            const { data, error } = await supabaseClient.from('users').select('*').eq('username', u).eq('password', p).maybeSingle();
-            if (data) { 
-                user = data; 
-                localStorage.setItem('v_u', JSON.stringify(data)); 
-                loginOk(); 
-            } else {
-                alert("Fail: Check credentials or RLS policies.");
-            }
+            const { data } = await client.from('users').select('*').eq('username', u).eq('password', p).maybeSingle();
+            if (data) { user = data; localStorage.setItem('v_u', JSON.stringify(data)); loginOk(); }
+            else alert("Fail");
         }
-    }
+    };
 
     function loginOk() {
-        showScreen('home-screen');
+        window.showScreen('home-screen');
         document.getElementById('nb').style.display = 'flex';
-        loadList();
+        window.loadList();
     }
 
-    async function startChat() {
+    window.startChat = async () => {
         const val = document.getElementById('new-u').value;
         if (!val) return;
         const parts = [...new Set([...val.split(',').map(x=>x.trim().toLowerCase()), user.username])].sort();
         const gName = parts.length > 2 ? prompt("Group Name?") : null;
-        
-        await supabaseClient.from('messages').insert([{ participants: parts, sender: 'SYS', content: 'Start', group_name: gName }]);
+        await client.from('messages').insert([{ participants: parts, sender: 'SYS', content: 'Start', group_name: gName }]);
         document.getElementById('new-u').value = '';
-        loadList();
-    }
+        window.loadList();
+    };
 
-    async function loadList() {
-        const { data } = await supabaseClient.from('messages').select('*').contains('participants', [user.username]).order('created_at', {ascending: false});
+    window.loadList = async () => {
+        const { data } = await client.from('messages').select('*').contains('participants', [user.username]).order('created_at', {ascending: false});
         const list = document.getElementById('chat-list'); 
         list.innerHTML = '';
         const seen = new Set();
-        
         if (data) data.forEach(m => {
             const key = m.participants.sort().join('|');
             if (!seen.has(key)) {
@@ -157,51 +144,37 @@
                 item.style = "padding:15px; background:var(--input); border-radius:12px; margin-bottom:8px; cursor:pointer;";
                 let label = m.group_name || m.participants.find(p => p !== user.username);
                 item.innerHTML = `<b>${label || 'Me'}</b>`;
-                item.onclick = () => openChat(m.participants, label, m.group_name);
+                item.onclick = () => window.openChat(m.participants, label);
                 list.appendChild(item);
             }
         });
-    }
+    };
 
-    async function openChat(parts, title, gName) {
+    window.openChat = async (parts, title) => {
         curParts = parts;
         document.getElementById('c-t').innerText = title;
         document.getElementById('chat-window').style.display = 'flex';
-        document.getElementById('output').innerHTML = 'Loading...';
-        
-        await loadMsgs();
-        
-        if (channel) supabaseClient.removeChannel(channel);
-        channel = supabaseClient.channel('room').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => {
-            const incomingParts = p.new.participants.sort().join('|');
-            if (incomingParts === curParts.sort().join('|')) render(p.new);
-        }).subscribe();
-    }
-
-    async function loadMsgs() {
-        const { data } = await supabaseClient.from('messages').select('*').order('created_at', {ascending: true});
         document.getElementById('output').innerHTML = '';
-        if (data) {
-            const sortedCur = curParts.sort().join('|');
-            data.filter(m => m.participants.sort().join('|') === sortedCur).forEach(render);
-        }
-    }
+        await window.loadMsgs();
+        if (channel) client.removeChannel(channel);
+        channel = client.channel('room').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => {
+            if (p.new.participants.sort().join('|') === curParts.sort().join('|')) render(p.new);
+        }).subscribe();
+    };
 
-    async function send() {
+    window.loadMsgs = async () => {
+        const { data } = await client.from('messages').select('*').order('created_at', {ascending: true});
+        const sortedCur = curParts.sort().join('|');
+        if (data) data.filter(m => m.participants.sort().join('|') === sortedCur).forEach(render);
+    };
+
+    window.send = async () => {
         const val = document.getElementById('m-i').value;
         if (!val) return;
-        
-        // Find group name if it exists for this participant set
-        const { data } = await supabaseClient.from('messages').select('group_name').contains('participants', curParts).limit(1).maybeSingle();
-        
-        await supabaseClient.from('messages').insert([{ 
-            participants: curParts, 
-            sender: user.username, 
-            content: val, 
-            group_name: data?.group_name || null 
-        }]);
+        const { data } = await client.from('messages').select('group_name').contains('participants', curParts).limit(1).maybeSingle();
+        await client.from('messages').insert([{ participants: curParts, sender: user.username, content: val, group_name: data?.group_name }]);
         document.getElementById('m-i').value = '';
-    }
+    };
 
     function render(m) {
         if (m.sender === 'SYS') return;
@@ -212,8 +185,9 @@
         document.getElementById('output').scrollTop = 99999;
     }
 
-    function closeChat() { document.getElementById('chat-window').style.display = 'none'; }
-    function logout() { localStorage.clear(); location.reload(); }
+    window.closeChat = () => { document.getElementById('chat-window').style.display = 'none'; };
+    window.logout = () => { localStorage.clear(); location.reload(); };
+    window.toggleParticipants = () => { alert("Members: " + curParts.join(', ')); };
 </script>
 </body>
 </html>
