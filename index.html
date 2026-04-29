@@ -10,31 +10,37 @@
         body.light-mode { --bg: #f6f8fa; --card: #ffffff; --input: #f6f8fa; --border: #d0d7de; --text: #24292f; --header: #1f2328; }
         * { box-sizing: border-box; transition: all 0.2s ease; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; height: 100vh; margin: 0; padding: 10px; overflow: hidden; }
+        
         .container { width: 100%; max-width: 450px; background: var(--card); border-radius: 32px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; position: relative; }
         .screen { display: none; flex-direction: column; height: calc(100% - 65px); padding: 20px; }
         .active { display: flex; }
-        input { background: var(--input); border: 1px solid var(--border); color: var(--header); padding: 16px; border-radius: 14px; outline: none; width: 100%; }
-        button { border: none; padding: 16px; border-radius: 14px; font-weight: 600; cursor: pointer; background: var(--primary); color: #000; }
+
+        input { background: var(--input); border: 1px solid var(--border); color: var(--header); padding: 16px; border-radius: 14px; outline: none; width: 100%; margin-bottom: 10px; }
+        button { border: none; padding: 16px; border-radius: 14px; font-weight: 600; cursor: pointer; background: var(--primary); color: #000; width: 100%; margin-bottom: 5px; }
         .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
         .btn-danger { background: #ff4d4d !important; color: white !important; }
+
         .nav-bar { position: absolute; bottom: 0; width: 100%; height: 65px; background: var(--card); display: flex; border-top: 1px solid var(--border); z-index: 10; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; opacity: 0.5; }
         .nav-item.active-nav { opacity: 1; color: var(--primary); }
+
         #output { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 10px 0; scroll-behavior: smooth; }
         .msg { padding: 12px 16px; border-radius: 20px; max-width: 85%; font-size: 15px; position: relative; }
         .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 4px; }
         .msg-other { align-self: flex-start; background: var(--input); color: var(--header); border-bottom-left-radius: 4px; }
-        .time { font-size: 9px; opacity: 0.6; margin-top: 4px; display: block; text-align: right; }
+
+        #chat-settings-sheet, #admin-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; background: var(--card); border-radius: 30px 30px 0 0; border-top: 1px solid var(--border); z-index: 200; padding: 25px; display: flex; flex-direction: column; gap: 10px; transition: 0.3s ease; }
+        .open { bottom: 0 !important; }
+
         .side-panel { position: absolute; top: 0; right: -100%; width: 80%; height: calc(100% - 65px); background: var(--card); border-left: 1px solid var(--border); z-index: 150; padding: 25px; transition: 0.3s ease; box-shadow: -10px 0 30px rgba(0,0,0,0.4); }
         .side-panel.panel-open { right: 0; }
-        #chat-settings-sheet, #admin-sheet { position: absolute; bottom: -100%; left: 0; width: 100%; height: auto; background: var(--card); border-radius: 30px 30px 0 0; border-top: 1px solid var(--border); z-index: 200; padding: 25px; display: flex; flex-direction: column; gap: 15px; transition: 0.3s; }
-        .open { bottom: 0 !important; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="login-screen" class="screen active" style="justify-content:center; gap:15px;">
+    <!-- Screens -->
+    <div id="login-screen" class="screen active" style="justify-content:center;">
         <h1 style="text-align:center; color:var(--header);">Vault Chat</h1>
         <input type="text" id="login-user" placeholder="Username">
         <input type="password" id="login-pass" placeholder="Password">
@@ -42,7 +48,7 @@
         <button class="btn-ghost" onclick="showScreen('signup-screen')">New Account</button>
     </div>
 
-    <div id="signup-screen" class="screen" style="justify-content:center; gap:15px;">
+    <div id="signup-screen" class="screen" style="justify-content:center;">
         <h1 style="text-align:center; color:var(--header);">Register</h1>
         <input type="text" id="signup-user" placeholder="Username">
         <input type="password" id="signup-pass" placeholder="Password">
@@ -53,42 +59,41 @@
     <div id="home-screen" class="screen">
         <h2 style="color:var(--header); margin-top:0;">Messages</h2>
         <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <input type="text" id="new-chat-user" placeholder="User1, User2...">
-            <button onclick="startNewChat()" style="width:60px;">+</button>
+            <input type="text" id="new-chat-user" placeholder="User1, User2..." style="margin-bottom:0;">
+            <button onclick="startNewChat()" style="width:60px; margin-bottom:0;">+</button>
         </div>
         <div id="chat-list" style="overflow-y:auto; flex:1;"></div>
     </div>
 
     <div id="settings-screen" class="screen">
         <h2 style="color:var(--header); margin-top:0;">Settings</h2>
-        <div style="background:var(--input); padding:20px; border-radius:20px; text-align:center;">
-            <div id="settings-username-display" style="font-size:22px; font-weight:700; color:var(--header);">---</div>
-        </div>
-        <button class="btn-ghost" onclick="toggleTheme()" style="margin-top:20px; width:100%;">🌓 Appearance</button>
-        <button class="btn-ghost" onclick="openAdmin()" style="margin-top:10px; width:100%;">🛠️ Admin Console</button>
+        <div id="settings-username-display" style="font-size:22px; font-weight:700; color:var(--header); text-align:center; padding:20px; background:var(--input); border-radius:20px;">---</div>
+        <button class="btn-ghost" onclick="toggleTheme()" style="margin-top:20px;">🌓 Appearance</button>
+        <button class="btn-ghost" onclick="openAdmin()">🛠️ Admin Console</button>
         <button class="btn-danger" onclick="logout()" style="margin-top:auto;">Sign Out</button>
     </div>
 
     <div id="chat-window" class="screen" style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:50; background:var(--card); display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:15px; border-bottom:1px solid var(--border);">
-            <button onclick="closeChatWindow()" style="background:none; color:var(--text); border:none; font-size:20px;">←</button>
+            <button onclick="closeChatWindow()" style="background:none; color:var(--text); border:none; font-size:20px; width:auto;">←</button>
             <b id="chat-title" style="color:var(--header);">Chat</b>
             <div style="display:flex; gap:10px;">
-                <button onclick="toggleParticipants()" style="background:none; color:var(--text); border:none; font-size:20px;">👥</button>
-                <button onclick="toggleChatSettings()" style="background:none; color:var(--text); border:none; font-size:20px;">⚙️</button>
+                <button onclick="toggleParticipants()" style="background:none; color:var(--text); border:none; font-size:20px; width:auto;">👥</button>
+                <button onclick="toggleChatSettings()" style="background:none; color:var(--text); border:none; font-size:20px; width:auto;">⚙️</button>
             </div>
         </div>
         <div id="output"></div>
         <div style="display:flex; gap:10px; padding-top:10px;">
-            <input type="text" id="msg" placeholder="Message...">
-            <button onclick="sendMsg()" style="width:60px;">➤</button>
+            <input type="text" id="msg-input" placeholder="Message..." style="margin-bottom:0;">
+            <button onclick="sendMsg()" style="width:60px; margin-bottom:0;">➤</button>
         </div>
     </div>
 
+    <!-- UI Sheets -->
     <div id="participants-panel" class="side-panel">
         <h3 style="color:var(--header);">Members</h3>
         <div id="participants-list"></div>
-        <button onclick="toggleParticipants()" class="btn-ghost" style="margin-top:20px; width:100%;">Close</button>
+        <button onclick="toggleParticipants()" class="btn-ghost" style="margin-top:20px;">Close</button>
     </div>
 
     <div id="chat-settings-sheet">
@@ -112,19 +117,28 @@
 <script>
     const SUPABASE_URL = 'https://supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsZmRnZ3ppbG5kdnRieWZxYmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNDUwOTgsImV4cCI6MjA4NzYyMTA5OH0.XlzFZSA';
+    
+    // Ensure supabase library is loaded
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let currentUser = null, currentParticipants = [], messageChannel = null;
+    let currentUser = null;
+    let currentParticipants = [];
+    let messageChannel = null;
+    let currentGroupName = null;
 
+    // Initialization
     window.onload = () => {
         const saved = localStorage.getItem('v_user');
-        if (saved) { currentUser = JSON.parse(saved); loginSuccess(); }
+        if (saved) {
+            currentUser = JSON.parse(saved);
+            loginSuccess();
+        }
         if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
     };
 
     function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'flex';
     }
 
     function navTo(id) {
@@ -138,17 +152,22 @@
         const pass = document.getElementById(type + '-pass').value;
         if (!user || !pass) return alert("Fill all fields");
 
-        if (type === 'signup') {
-            const { error } = await _supabase.from('users').insert([{ username: user, password: pass }]);
-            if (error) return alert("User exists or error.");
-            alert("Account created!"); showScreen('login-screen');
-        } else {
-            const { data } = await _supabase.from('users').select('*').eq('username', user).eq('password', pass).maybeSingle();
-            if (data) {
-                if (data.is_banned) return alert("Banned.");
-                currentUser = data; localStorage.setItem('v_user', JSON.stringify(data)); loginSuccess();
-            } else alert("Invalid credentials.");
-        }
+        try {
+            if (type === 'signup') {
+                const { error } = await _supabase.from('users').insert([{ username: user, password: pass }]);
+                if (error) throw error;
+                alert("Account created!"); showScreen('login-screen');
+            } else {
+                const { data, error } = await _supabase.from('users').select('*').eq('username', user).eq('password', pass).maybeSingle();
+                if (error) throw error;
+                if (data) {
+                    if (data.is_banned) return alert("Account banned.");
+                    currentUser = data;
+                    localStorage.setItem('v_user', JSON.stringify(data));
+                    loginSuccess();
+                } else alert("Invalid credentials.");
+            }
+        } catch (e) { alert("Error: " + e.message); }
     }
 
     function loginSuccess() {
@@ -159,6 +178,7 @@
     }
 
     function logout() { localStorage.removeItem('v_user'); location.reload(); }
+
     function toggleTheme() {
         document.body.classList.toggle('light-mode');
         localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
@@ -170,23 +190,22 @@
         const users = val.split(',').map(u => u.trim().toLowerCase()).filter(u => u !== "");
         const isGroup = users.length > 1;
         let gName = isGroup ? prompt("Group Name:", "New Group") : null;
-        if (isGroup && !gName) return;
-
+        
         const participants = [...new Set([...users, currentUser.username.toLowerCase()])].sort();
         
-        // Use 'messages' table to initiate chat
         const { error } = await _supabase.from('messages').insert([{
             participants, is_group: isGroup, group_name: gName,
-            sender: 'SYSTEM', content: 'Chat Started'
+            sender: 'SYSTEM', content: 'Chat Created'
         }]);
 
-        if (error) alert("Error: " + error.message);
+        if (error) alert(error.message);
         else { document.getElementById('new-chat-user').value = ''; loadChatList(); }
     }
 
     async function loadChatList() {
         const { data } = await _supabase.from('messages').select('*').contains('participants', [currentUser.username]);
-        const list = document.getElementById('chat-list'); list.innerHTML = '';
+        const list = document.getElementById('chat-list'); 
+        list.innerHTML = '';
         if (data) {
             const unique = new Map();
             data.forEach(m => {
@@ -198,14 +217,15 @@
                 div.style.cssText = "background:var(--input); padding:18px; margin-bottom:12px; border-radius:18px; cursor:pointer;";
                 let label = chat.is_group ? "👥 " + chat.group_name : chat.participants.find(p => p !== currentUser.username);
                 div.innerHTML = `<b>${label || 'Chat'}</b>`;
-                div.onclick = () => openChat(chat.participants, label);
+                div.onclick = () => openChat(chat.participants, label, chat.group_name);
                 list.appendChild(div);
             });
         }
     }
 
-    function openChat(parts, title) {
+    function openChat(parts, title, gName) {
         currentParticipants = parts.sort();
+        currentGroupName = gName;
         document.getElementById('chat-title').innerText = title;
         document.getElementById('chat-window').style.display = 'flex';
         document.getElementById('output').innerHTML = '';
@@ -228,26 +248,23 @@
 
     function subscribeToChat() {
         if (messageChannel) _supabase.removeChannel(messageChannel);
-        messageChannel = _supabase.channel('global_messages')
+        messageChannel = _supabase.channel('messages_realtime')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, p => {
                 if (JSON.stringify(p.new.participants.sort()) === JSON.stringify(currentParticipants)) renderMsg(p.new);
             }).subscribe();
     }
 
     async function sendMsg() {
-        const val = document.getElementById('msg').value.trim();
+        const val = document.getElementById('msg-input').value.trim();
         if (!val) return;
-        // Group Name must be included in every message to keep them in the same "chat"
-        const existing = await _supabase.from('messages').select('group_name, is_group').contains('participants', currentParticipants).limit(1).maybeSingle();
-        
         await _supabase.from('messages').insert([{
             participants: currentParticipants,
             sender: currentUser.username,
             content: val,
-            is_group: existing.data?.is_group || false,
-            group_name: existing.data?.group_name || null
+            is_group: currentParticipants.length > 2,
+            group_name: currentGroupName
         }]);
-        document.getElementById('msg').value = '';
+        document.getElementById('msg-input').value = '';
     }
 
     function renderMsg(m) {
@@ -267,18 +284,20 @@
     }
 
     function toggleChatSettings() { document.getElementById('chat-settings-sheet').classList.toggle('open'); }
+    function openAdmin() { document.getElementById('admin-sheet').classList.add('open'); }
+    function closeAdmin() { document.getElementById('admin-sheet').classList.remove('open'); }
+
     async function deleteCurrentChat() {
         if (confirm("Delete history?")) {
             await _supabase.from('messages').delete().contains('participants', currentParticipants);
             document.getElementById('output').innerHTML = ''; toggleChatSettings();
         }
     }
-    function openAdmin() { document.getElementById('admin-sheet').classList.add('open'); }
-    function closeAdmin() { document.getElementById('admin-sheet').classList.remove('open'); }
+
     async function adminAction() {
         if (document.getElementById('admin-pw').value !== 'SECRET123') return alert("Denied");
         await _supabase.from('users').update({ is_banned: true }).eq('username', document.getElementById('ban-target').value.toLowerCase());
-        alert("Done.");
+        alert("Action completed.");
     }
 </script>
 </body>
