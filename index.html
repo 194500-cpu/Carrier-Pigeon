@@ -9,81 +9,70 @@
         :root { --primary: #3ecf8e; --user-msg: #3b82f6; --bg: #0b0e11; --sidebar: #1c2127; --card: #0d1117; --input: #2d333b; --border: #30363d; --text: #adbac7; --header: #ffffff; }
         body.light-mode { --bg: #f6f8fa; --sidebar: #ffffff; --card: #f6f8fa; --input: #ffffff; --border: #d0d7de; --text: #24292f; --header: #1f2328; }
         
-        * { box-sizing: border-box; transition: background 0.1s, border 0.1s; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; width: 100vw; overflow: hidden; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; width: 100vw; overflow: hidden; }
 
-        /* Left Navigation Rail */
-        .rail { width: 80px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 20px; z-index: 100; flex-shrink: 0; }
-        .rail-item { width: 55px; height: 55px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; opacity: 0.6; text-decoration: none; color: inherit; }
+        .rail { width: 80px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 20px; flex-shrink: 0; }
+        .rail-item { width: 55px; height: 55px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; opacity: 0.6; color: inherit; transition: 0.2s; }
         .rail-item span { font-size: 9px; font-weight: bold; margin-top: 4px; }
         .rail-item:hover { background: var(--input); opacity: 1; }
-        .rail-item.active-nav { background: var(--primary); color: #000; opacity: 1; }
-        .rail-logout { color: #ff4d4d; opacity: 0.8; margin-top: auto; }
+        .active-nav { background: var(--primary); color: #000; opacity: 1; }
 
-        /* Inbox List */
-        .inbox { width: 320px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+        .inbox { width: 300px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
         .inbox-header { padding: 20px; border-bottom: 1px solid var(--border); }
+        .section-label { font-size: 10px; font-weight: 800; opacity: 0.4; padding: 15px 20px 5px; text-transform: uppercase; }
+        
         #chat-list { flex: 1; overflow-y: auto; padding: 10px; }
-        .chat-card { padding: 12px 16px; border-radius: 12px; cursor: pointer; margin-bottom: 4px; display: flex; align-items: center; gap: 12px; position: relative; border: 1px solid transparent; }
+        .chat-card { padding: 12px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 4px; display: flex; align-items: center; gap: 12px; border: 1px solid transparent; }
         .chat-card:hover { background: var(--input); }
-        .chat-card.active-chat { background: var(--input); border-color: var(--border); }
+        .active-chat { background: var(--input); border-color: var(--border); }
+
+        .view-container { flex: 1; display: flex; flex-direction: column; background: var(--card); overflow: hidden; }
+        .main-header { padding: 0 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; height: 65px; background: var(--sidebar); flex-shrink: 0; }
         
-        /* Main View Container */
-        .view-container { flex: 1; display: flex; flex-direction: column; background: var(--card); overflow: hidden; position: relative; }
+        /* Fixed Scroll Area */
+        #output { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; height: 100%; }
         
-        /* Chat Content */
-        .main-header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; height: 65px; background: var(--sidebar); flex-shrink: 0; }
-        
-        /* THE SCROLL FIX: Ensure #output takes available space and scrolls */
-        #output { flex: 1; overflow-y: scroll; padding: 25px; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
-        
-        /* Messages */
-        .msg { padding: 10px 16px; border-radius: 16px; max-width: 65%; font-size: 14px; line-height: 1.4; position: relative; cursor: pointer; word-wrap: break-word; }
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 70%; font-size: 14px; line-height: 1.4; position: relative; }
         .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 2px; }
         .msg-other { align-self: flex-start; background: var(--input); color: var(--header); border-bottom-left-radius: 2px; }
-        .msg-sender { font-size: 10px; font-weight: 700; color: var(--primary); margin-bottom: 4px; display: block; }
+        .msg-sender { font-size: 10px; font-weight: 700; color: var(--primary); margin-bottom: 3px; display: block; }
         .time { font-size: 9px; opacity: 0.5; margin-top: 4px; display: block; text-align: right; }
-        .date-divider { align-self: center; font-size: 11px; font-weight: 600; margin: 20px 0; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Inputs */
-        .input-area { padding: 20px 25px; background: var(--sidebar); border-top: 1px solid var(--border); display: flex; gap: 15px; flex-shrink: 0; }
-        input { background: var(--input); border: 1px solid var(--border); color: var(--header); padding: 12px 16px; border-radius: 8px; outline: none; flex: 1; }
-        button { border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; background: var(--primary); color: #000; }
-        .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .input-area { padding: 20px; background: var(--sidebar); border-top: 1px solid var(--border); display: flex; gap: 10px; flex-shrink: 0; }
+        input { background: var(--input); border: 1px solid var(--border); color: var(--header); padding: 12px; border-radius: 8px; outline: none; flex: 1; }
+        button { border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; background: var(--primary); color: #000; }
 
-        /* Auth */
         #auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; }
-        .auth-card { width: 350px; padding: 40px; background: var(--sidebar); border: 1px solid var(--border); border-radius: 24px; text-align: center; }
-
-        .new-badge { width: 10px; height: 10px; background: var(--primary); border-radius: 50%; position: absolute; right: 15px; }
+        .auth-card { width: 320px; padding: 30px; background: var(--sidebar); border: 1px solid var(--border); border-radius: 20px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="auth-overlay">
-    <div class="auth-card" id="auth-box">
-        <h2 id="auth-title">Vault Chat</h2>
-        <input type="text" id="auth-user" placeholder="Username" style="margin-bottom:10px;">
-        <input type="password" id="auth-pass" placeholder="Password" style="margin-bottom:20px;">
+    <div class="auth-card">
+        <h2>Vault Chat</h2>
+        <input type="text" id="auth-user" placeholder="Username" style="margin-bottom:10px; width:100%;">
+        <input type="password" id="auth-pass" placeholder="Password" style="margin-bottom:20px; width:100%;">
         <button onclick="handleAuth()" style="width:100%;">Sign In</button>
-        <p style="font-size:12px; margin-top:20px; cursor:pointer; opacity:0.6;" id="auth-toggle" onclick="toggleAuthMode()">Need an account? Register</p>
+        <p style="font-size:11px; margin-top:15px; cursor:pointer; opacity:0.5;" onclick="toggleAuthMode()">New? Create Account</p>
     </div>
 </div>
 
 <nav class="rail">
     <div class="rail-item active-nav" id="nav-home" onclick="navTo('home')">💬<span>CHATS</span></div>
     <div class="rail-item" id="nav-settings" onclick="navTo('settings')">⚙️<span>CONFIG</span></div>
-    <div class="rail-item rail-logout" onclick="logout()">🚪<span>LOGOUT</span></div>
+    <div class="rail-item" style="color:#ff4d4d; margin-top:auto;" onclick="logout()">🚪<span>LOGOUT</span></div>
 </nav>
 
-<section id="home-view" style="flex:1; display:flex; min-width: 0;">
+<section id="home-view" style="flex:1; display:flex;">
     <aside class="inbox">
         <div class="inbox-header">
-            <h3 style="margin:0 0 15px 0;">Inbox</h3>
-            <input type="text" id="target-input" placeholder="User or Group name..." style="margin-bottom:8px; font-size:12px;">
+            <h3 style="margin:0 0 15px;">Inbox</h3>
+            <input type="text" id="target-input" placeholder="User..." style="font-size:12px; margin-bottom:8px; width:100%;">
             <div style="display:flex; gap:5px;">
-                <button onclick="startChat('private')" style="flex:1; padding:8px; font-size:11px;">+ Private</button>
-                <button onclick="startChat('group')" style="flex:1; padding:8px; font-size:11px; background:#9b59b6; color:#fff;">+ Group</button>
+                <button onclick="startChat('private')" style="flex:1; padding:8px; font-size:10px;">+ DM</button>
+                <button onclick="startChat('global')" style="flex:1; padding:8px; font-size:10px; background:#9b59b6; color:#fff;">+ Public</button>
             </div>
         </div>
         <div id="chat-list"></div>
@@ -92,34 +81,25 @@
     <main class="view-container">
         <div id="chat-active-ui" style="display:none; flex-direction:column; height:100%;">
             <header class="main-header">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <div id="header-avatar" style="width:35px; height:35px; border-radius:10px; background:var(--primary); color:#000; display:flex; align-items:center; justify-content:center; font-weight:bold;">?</div>
-                    <h3 id="chat-title" style="margin:0;">---</h3>
-                </div>
-                <button class="btn-ghost" onclick="deleteCurrentChat()" style="padding:8px 12px; font-size:12px;">Wipe History</button>
+                <h3 id="chat-title" style="margin:0;">---</h3>
+                <button style="background:none; border:1px solid var(--border); color:var(--text); padding:5px 10px; border-radius:5px; font-size:11px; cursor:pointer;" onclick="deleteCurrentChat()">Clear History</button>
             </header>
             <div id="output"></div>
             <div class="input-area">
-                <input type="text" id="msg" placeholder="Type message and press Enter...">
+                <input type="text" id="msg" placeholder="Message...">
                 <button onclick="sendMsg()">Send</button>
             </div>
         </div>
         <div id="empty-state" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.2;">
-            <div style="font-size:60px;">🐦</div>
             <p>Select a conversation</p>
         </div>
     </main>
 </section>
 
-<section id="settings-view" style="flex:1; display:none; padding:60px; overflow-y:auto;">
-    <div style="max-width:600px;">
-        <h1>Settings</h1>
-        <div style="background:var(--sidebar); padding:25px; border-radius:20px; margin-bottom:30px;">
-            <label style="opacity:0.5; font-size:12px;">Logged in as</label>
-            <h2 id="display-user" style="margin:5px 0 0 0;">---</h2>
-        </div>
-        <button class="btn-ghost" onclick="toggleTheme()" style="width:100%; margin-bottom:10px;">🌓 Change Theme</button>
-    </div>
+<section id="settings-view" style="flex:1; display:none; padding:40px;">
+    <h2>Settings</h2>
+    <p>Logged in as: <b id="display-user">---</b></p>
+    <button onclick="toggleTheme()" style="padding:10px; cursor:pointer;">🌓 Toggle Theme</button>
 </section>
 
 <script>
@@ -128,11 +108,7 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let myUser = "", activeRoom = "", chatInterval = null, authMode = 'login';
 
-    function toggleAuthMode() {
-        authMode = authMode === 'login' ? 'signup' : 'login';
-        document.getElementById('auth-title').innerText = authMode === 'login' ? 'Vault Chat' : 'Create Account';
-        document.getElementById('auth-toggle').innerText = authMode === 'login' ? 'Need an account? Register' : 'Have an account? Sign In';
-    }
+    function toggleAuthMode() { authMode = authMode === 'login' ? 'signup' : 'login'; }
 
     async function handleAuth() {
         const u = document.getElementById('auth-user').value.trim();
@@ -153,20 +129,17 @@
 
     async function startChat(type) {
         const target = document.getElementById('target-input').value.trim();
-        if(!target || target === myUser) return;
-        const roomId = type === 'group' ? 'group_' + target : [myUser, target].sort().join('_');
-        await _supabase.from('messages').insert([{ content: 'Chat initialized.', username: 'System', room_id: roomId }]);
+        if(!target) return;
+        const roomId = type === 'global' ? 'global_' + target : [myUser, target].sort().join('_');
+        await _supabase.from('messages').insert([{ content: 'Channel opened.', username: 'System', room_id: roomId }]);
         openChat(roomId, target);
-        document.getElementById('target-input').value = '';
     }
 
     function openChat(rid, title) {
         activeRoom = rid;
-        localStorage.setItem(`viewed_${rid}`, new Date().toISOString());
         document.getElementById('empty-state').style.display = 'none';
         document.getElementById('chat-active-ui').style.display = 'flex';
-        document.getElementById('chat-title').innerText = title.replace('group_', '');
-        document.getElementById('header-avatar').innerText = title[0].toUpperCase();
+        document.getElementById('chat-title').innerText = title.replace('global_', '# ');
         loadMessages();
         if(chatInterval) clearInterval(chatInterval);
         chatInterval = setInterval(loadMessages, 3000);
@@ -177,27 +150,17 @@
         if(!activeRoom) return;
         const { data } = await _supabase.from('messages').select('*').eq('room_id', activeRoom).order('created_at', {ascending: true});
         const out = document.getElementById('output');
-        const isAtBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 100;
+        const isAtBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 50;
 
-        let lastDate = "", html = "";
-        data?.forEach(m => {
-            const d = new Date(m.created_at).toDateString();
-            if (d !== lastDate) {
-                html += `<div class="date-divider">${d === new Date().toDateString() ? 'Today' : d}</div>`;
-                lastDate = d;
-            }
-            if(m.username === 'System') html += `<div style="text-align:center; font-size:11px; opacity:0.3; margin:10px 0;">${m.content}</div>`;
-            else {
-                const isMe = m.username === myUser;
-                const isGroup = activeRoom.startsWith('group_');
-                html += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}" onclick="${isMe ? `deleteMessage('${m.id}')` : ''}">
-                    ${isGroup && !isMe ? `<span class="msg-sender">${m.username}</span>` : ''}
-                    ${m.content}
-                    <span class="time">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
-                </div>`;
-            }
-        });
-        out.innerHTML = html;
+        out.innerHTML = (data || []).map(m => {
+            if(m.username === 'System') return `<div style="text-align:center; font-size:11px; opacity:0.3; margin:10px 0;">${m.content}</div>`;
+            const isMe = m.username === myUser;
+            return `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}">
+                ${!isMe ? `<span class="msg-sender">${m.username}</span>` : ''}
+                ${m.content}
+                <span class="time">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+            </div>`;
+        }).join('');
         if(isAtBottom) out.scrollTop = out.scrollHeight;
     }
 
@@ -208,43 +171,32 @@
         input.value = ''; loadMessages();
     }
 
-    async function deleteMessage(id) { if(confirm("Delete message?")) { await _supabase.from('messages').delete().eq('id', id); loadMessages(); } }
-    async function deleteCurrentChat() { if(confirm("Clear this entire history?")) { await _supabase.from('messages').delete().eq('room_id', activeRoom); loadMessages(); } }
-
     async function loadChatHub() {
-        const { data } = await _supabase.from('messages').select('room_id, created_at').neq('room_id', null).order('created_at', {ascending: false});
-        const roomsMap = {};
-        data?.forEach(m => {
-            if (m.room_id.includes(myUser) || m.room_id.startsWith('group_')) {
-                if (!roomsMap[m.room_id]) roomsMap[m.room_id] = m.created_at;
+        const { data } = await _supabase.from('messages').select('room_id').order('created_at', {descending: true});
+        const uniqueRooms = [...new Set(data.map(d => d.room_id))];
+        const list = document.getElementById('chat-list');
+        list.innerHTML = `<div class="section-label">Channels</div>`;
+        
+        uniqueRooms.forEach(r => {
+            // STRICT FILTER: Only show if room is global OR involves current user
+            if (r.startsWith('global_') || r.includes(myUser)) {
+                const name = r.startsWith('global_') ? r.replace('global_', '# ') : r.replace(myUser, '').replace('_','');
+                list.innerHTML += `<div class="chat-card ${activeRoom === r ? 'active-chat' : ''}" onclick="openChat('${r}', '${name}')">
+                    <div style="width:30px; height:30px; border-radius:6px; background:${r.startsWith('global_')?'#9b59b6':'var(--primary)'}; display:flex; align-items:center; justify-content:center; color:white; font-size:12px;">${r.startsWith('global_')?'#':name[0]}</div>
+                    <b>${name}</b>
+                </div>`;
             }
         });
-
-        const list = document.getElementById('chat-list');
-        list.innerHTML = '';
-        for (const r in roomsMap) {
-            const isGroup = r.startsWith('group_');
-            const name = isGroup ? r.replace('group_', '') : r.replace(myUser, '').replace('_','');
-            const hasNew = new Date(roomsMap[r]) > new Date(localStorage.getItem(`viewed_${r}`) || 0);
-            
-            list.innerHTML += `
-                <div class="chat-card ${activeRoom === r ? 'active-chat' : ''}" onclick="openChat('${r}', '${name}')">
-                    <div style="width:35px; height:35px; border-radius:8px; background:${isGroup ? '#9b59b6' : 'var(--primary)'}; color:${isGroup?'#fff':'#000'}; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px;">${name[0].toUpperCase()}</div>
-                    <div style="flex:1; overflow:hidden;">
-                        <div style="font-weight:600; color:var(--header); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${isGroup ? '👥 ' + name : name}</div>
-                    </div>
-                    ${hasNew && activeRoom !== r ? '<div class="new-badge"></div>' : ''}
-                </div>`;
-        }
     }
 
     function navTo(view) {
         document.getElementById('home-view').style.display = view === 'home' ? 'flex' : 'none';
         document.getElementById('settings-view').style.display = view === 'settings' ? 'block' : 'none';
         document.querySelectorAll('.rail-item').forEach(i => i.classList.remove('active-nav'));
-        document.getElementById('nav-' + view).classList.add('active-nav');
+        document.getElementById('nav-' + (view === 'home' ? 'home' : 'settings')).classList.add('active-nav');
     }
 
+    async function deleteCurrentChat() { if(confirm("Clear history?")) { await _supabase.from('messages').delete().eq('room_id', activeRoom); loadMessages(); } }
     function toggleTheme() { document.body.classList.toggle('light-mode'); }
     async function logout() { await _supabase.auth.signOut(); location.reload(); }
     document.getElementById('msg').addEventListener('keydown', e => e.key === 'Enter' && sendMsg());
