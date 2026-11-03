@@ -57,7 +57,7 @@
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-        #app-container { display: flex; flex: 1; width: 100%; height: 100%; }
+        #app-container { display: flex; flex: 1; width: 100%; height: 100%; overflow: hidden; }
 
         /* --- STANDARD CHAT UI --- */
         .rail { width: 72px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 24px; flex-shrink: 0; z-index: 10; }
@@ -65,7 +65,7 @@
         .rail-item:hover { background: var(--input); color: var(--text); transform: translateY(-2px); }
         .active-nav { background: var(--primary); color: #ffffff !important; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
 
-        .inbox { width: 320px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+        .inbox { width: 320px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; height: 100%; }
         .inbox-header { padding: 24px 20px 16px; }
         .inbox-header h3 { margin: 0 0 16px; font-size: 20px; font-weight: 700; color: var(--header); }
         
@@ -109,8 +109,10 @@
         .auth-card h2 { margin: 0 0 24px; color: var(--header); font-size: 28px; font-weight: 700; }
         .auth-card input { width: 100%; margin-bottom: 16px; border-radius: 8px; }
 
-        #settings-view { padding: 40px; max-width: 600px; margin: 0 auto; width: 100%; }
-        .settings-card { background: var(--sidebar); padding: 24px; border-radius: 16px; border: 1px solid var(--border); }
+        /* Settings View Fixes */
+        #settings-view { flex: 1; padding: 40px; overflow-y: auto; display: none; height: 100%; flex-direction: column; align-items: center; }
+        .settings-content { max-width: 600px; width: 100%; }
+        .settings-card { background: var(--sidebar); padding: 24px; border-radius: 16px; border: 1px solid var(--border); width: 100%; }
 
         #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
         .toast { background: var(--primary); color: white; padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; transform: translateX(120%); opacity: 0; transition: all 0.4s; display: flex; align-items: center; gap: 12px; }
@@ -321,17 +323,27 @@
         </main>
     </section>
 
-    <section id="settings-view" style="flex:1; display:none;">
-        <h2>Settings</h2>
-        <div class="settings-card">
-            <p style="margin-top: 0;">Logged in as: <b id="display-user" style="color: var(--primary); font-size: 18px;">---</b></p>
-            <hr style="border: none; border-top: 1px solid var(--border); margin: 24px 0;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h4 style="margin: 0 0 8px; color: var(--header);">Appearance</h4>
-                    <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Switch between light and dark mode</p>
+    <section id="settings-view">
+        <div class="settings-content">
+            <h2>Settings</h2>
+            <div class="settings-card">
+                <p style="margin-top: 0;">Logged in as: <b id="display-user" style="color: var(--primary); font-size: 18px;">---</b></p>
+                <hr style="border: none; border-top: 1px solid var(--border); margin: 24px 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div>
+                        <h4 style="margin: 0 0 8px; color: var(--header);">Appearance</h4>
+                        <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Switch between light and dark mode</p>
+                    </div>
+                    <button onclick="toggleTheme()" class="secondary" style="border-radius: 8px;">Toggle Theme</button>
                 </div>
-                <button onclick="toggleTheme()" class="secondary" style="border-radius: 8px;">🌓 Toggle Theme</button>
+                <hr style="border: none; border-top: 1px solid var(--border); margin: 24px 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h4 style="margin: 0 0 8px; color: var(--header);">Notifications</h4>
+                        <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Enable browser pop-up notifications</p>
+                    </div>
+                    <button onclick="requestNotificationPermission()" class="secondary" style="border-radius: 8px;">Enable Alerts</button>
+                </div>
             </div>
         </div>
     </section>
@@ -359,8 +371,21 @@
         }
     });
 
+    function requestNotificationPermission() {
+        if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
+    }
+
     function showToast(message) {
         if (document.body.classList.contains('gmail-mode')) return; 
+        
+        // Native browser notification
+        if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("Vault Chat", { body: message });
+        }
+
+        // In-app UI Toast
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
         toast.className = 'toast';
@@ -370,7 +395,10 @@
         
         void toast.offsetWidth; 
         toast.classList.add('show');
-        alertSound.play().catch(e => {});
+        
+        // Play sound if possible
+        alertSound.play().catch(e => { console.log("Audio autoplay prevented by browser."); });
+        
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 400); 
@@ -410,7 +438,17 @@
         if (!u || !p) return alert("Please enter both username and password.");
         const email = u + '@chat.com';
         const { error } = await (authMode === 'login' ? _supabase.auth.signInWithPassword({ email, password: p }) : _supabase.auth.signUp({ email, password: p }));
-        if (error) alert(error.message); else { if (authMode === 'signup') alert("Account created!"); checkUser(); }
+        
+        if (error) {
+            alert(error.message);
+        } else { 
+            if (authMode === 'signup') alert("Account created!"); 
+            // Ask for notifications exactly when the user clicks 'Sign In' (satisfies user interaction rule)
+            requestNotificationPermission();
+            // Prime audio context
+            alertSound.play().then(() => { alertSound.pause(); alertSound.currentTime = 0; }).catch(() => {});
+            checkUser(); 
+        }
     }
 
     async function checkUser() {
@@ -563,7 +601,7 @@
 
     function navTo(view) {
         document.getElementById('home-view').style.display = view === 'home' ? 'flex' : 'none';
-        document.getElementById('settings-view').style.display = view === 'settings' ? 'block' : 'none';
+        document.getElementById('settings-view').style.display = view === 'settings' ? 'flex' : 'none';
         document.querySelectorAll('.rail-item').forEach(i => i.classList.remove('active-nav'));
         document.getElementById('nav-' + (view === 'home' ? 'home' : 'settings')).classList.add('active-nav');
     }
