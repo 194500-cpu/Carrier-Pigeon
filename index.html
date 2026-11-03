@@ -21,6 +21,7 @@
             --user-msg: #6366f1; 
             --other-msg: #334155;
             --other-msg-text: #f1f5f9;
+            --font: 'Inter', -apple-system, sans-serif;
         }
         
         body.light-mode { 
@@ -36,11 +37,82 @@
             --other-msg: #f1f5f9;
             --other-msg-text: #0f172a;
         }
+
+        /* --- SCHOOL / GITHUB DISGUISE MODE --- */
+        body.school-mode {
+            --bg: #0d1117; 
+            --sidebar: #010409; 
+            --card: #010409; 
+            --input: #0d1117; 
+            --border: #30363d; 
+            --text: #c9d1d9; 
+            --text-muted: #8b949e;
+            --header: #c9d1d9; 
+            --user-msg: transparent; 
+            --other-msg: transparent;
+            --other-msg-text: #c9d1d9;
+            --font: Consolas, "Courier New", monospace;
+            --primary: #238636;
+            --primary-hover: #2ea043;
+        }
+        
+        body.school-mode .avatar-public, 
+        body.school-mode .avatar-dm { display: none; }
+        
+        body.school-mode .chat-card::before {
+            content: '📄';
+            font-size: 14px;
+            margin-right: 8px;
+            filter: grayscale(100%);
+        }
+        
+        body.school-mode .msg {
+            max-width: 100%;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        body.school-mode .msg-me, 
+        body.school-mode .msg-other {
+            align-self: flex-start;
+            color: var(--text);
+            text-align: left;
+        }
+        
+        body.school-mode .msg-sender {
+            color: #58a6ff;
+            margin-bottom: 0;
+            min-width: 100px;
+            text-transform: none;
+        }
+        
+        body.school-mode .msg-me .msg-sender {
+            color: #7ee787;
+            text-align: left;
+        }
+        
+        body.school-mode .time {
+            margin-top: 0;
+            margin-left: auto;
+        }
+
+        body.school-mode .inbox-header h3::before { content: 'Explorer: '; color: var(--text-muted); font-weight: normal; }
+        body.school-mode .main-header h3::before { content: 'main / '; color: #8b949e; font-weight: normal; }
+        
+        body.school-mode input { border-radius: 4px; }
+        body.school-mode button { border-radius: 4px; }
+        body.school-mode .rail-item { border-radius: 4px; font-size: 16px; }
+        /* -------------------------------------- */
         
         * { box-sizing: border-box; }
         
         body { 
-            font-family: 'Inter', -apple-system, sans-serif; 
+            font-family: var(--font); 
             background: var(--bg); 
             color: var(--text); 
             margin: 0; 
@@ -48,7 +120,7 @@
             height: 100vh; 
             width: 100vw; 
             overflow: hidden; 
-            transition: background 0.3s, color 0.3s;
+            transition: background 0.1s, color 0.1s;
         }
 
         ::-webkit-scrollbar { width: 6px; }
@@ -60,7 +132,7 @@
         .rail-item { width: 48px; height: 48px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; opacity: 0.5; color: inherit; transition: all 0.2s ease; }
         .rail-item span { font-size: 9px; font-weight: 700; margin-top: 4px; letter-spacing: 0.5px; }
         .rail-item:hover { background: var(--input); opacity: 1; transform: translateY(-2px); }
-        .active-nav { background: var(--primary); color: white; opacity: 1; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
+        .active-nav { background: var(--primary); color: white; opacity: 1; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
 
         .inbox { width: 320px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
         .inbox-header { padding: 24px 20px 16px; }
@@ -114,6 +186,11 @@
         #settings-view h2 { margin-top: 0; color: var(--header); font-size: 28px; margin-bottom: 24px; }
         .settings-card { background: var(--sidebar); padding: 24px; border-radius: 16px; border: 1px solid var(--border); }
 
+        /* In-App Toast Notification */
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--primary); color: white; padding: 14px 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-size: 14px; font-weight: 500; transform: translateX(120%); opacity: 0; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); display: flex; align-items: center; gap: 10px; }
+        .toast.show { transform: translateX(0); opacity: 1; }
+
         @media (max-width: 768px) {
             .inbox { width: 250px; }
             .msg { max-width: 90%; }
@@ -140,9 +217,10 @@
 </div>
 
 <nav class="rail">
-    <div class="rail-item active-nav" id="nav-home" onclick="navTo('home')">💬</div>
-    <div class="rail-item" id="nav-settings" onclick="navTo('settings')">⚙️</div>
-    <div class="rail-item" style="color:#ef4444; margin-top:auto;" onclick="logout()">🚪</div>
+    <div class="rail-item active-nav" id="nav-home" onclick="navTo('home')" title="Messages">💬</div>
+    <div class="rail-item" id="nav-settings" onclick="navTo('settings')" title="Settings">⚙️</div>
+    <div class="rail-item" id="nav-school" onclick="toggleSchoolMode()" title="Boss Key" style="margin-top:auto; font-size: 22px;">👨‍💻</div>
+    <div class="rail-item" style="color:#ef4444;" onclick="logout()" title="Logout">🚪</div>
 </nav>
 
 <section id="home-view" style="flex:1; display:flex;">
@@ -201,6 +279,8 @@
     </div>
 </section>
 
+<div id="toast-container"></div>
+
 <script>
     window.onerror = function(msg, url, line) {
         alert("System Error on line " + line + ": " + msg);
@@ -210,6 +290,9 @@
     let _supabase, myUser = "", activeRoom = "", chatInterval = null, authMode = 'login';
     let knownMessageIds = new Set();
     let isFirstLoad = true;
+    
+    // Notification Audio Ping
+    const alertSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
 
     document.addEventListener("DOMContentLoaded", () => {
         try {
@@ -223,6 +306,25 @@
             alert("Failed to connect to database: " + err.message);
         }
     });
+
+    // Custom In-App Toast Notification
+    function showToast(message) {
+        if (document.body.classList.contains('school-mode')) return; // Mute toasts in school mode
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `💬 ${message}`;
+        container.appendChild(toast);
+        
+        void toast.offsetWidth; 
+        toast.classList.add('show');
+        alertSound.play().catch(e => console.log("Audio play blocked by browser", e));
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400); 
+        }, 3000);
+    }
 
     function requestNotificationPermission() {
         if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
@@ -288,8 +390,9 @@
             document.getElementById('auth-overlay').style.opacity = '0';
             setTimeout(() => document.getElementById('auth-overlay').style.display = 'none', 300);
             document.getElementById('display-user').innerText = myUser;
+            
             saveRoomLocally('global_General'); 
-            requestNotificationPermission(); // Ask for notification permission after login
+            requestNotificationPermission(); 
             loadChatHub();
         }
     }
@@ -305,7 +408,7 @@
 
     function openChat(rid, title) {
         activeRoom = rid;
-        knownMessageIds.clear(); // Reset seen messages when switching rooms
+        knownMessageIds.clear(); 
         isFirstLoad = true;
         
         document.getElementById('empty-state').style.display = 'none';
@@ -315,6 +418,7 @@
         loadMessages();
         if(chatInterval) clearInterval(chatInterval);
         chatInterval = setInterval(loadMessages, 3000);
+        
         loadChatHub(); 
     }
 
@@ -328,16 +432,14 @@
         (data || []).forEach(m => {
             const isMe = m.username === myUser;
             
-            // Notification Trigger Logic
             if (!isFirstLoad && !knownMessageIds.has(m.id) && !isMe) {
-                if ("Notification" in window && Notification.permission === "granted") {
-                    // Send notification if tab is in the background or they are in another app
-                    if (document.hidden) {
-                        new Notification(`New message from ${m.username}`, { 
-                            body: m.content,
-                            icon: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzYzNjZmMSIgZD0iTTIxIDE1YTIgMiAwIDAgMS0yIDJIN2wtNCA0VjVhMiAyIDAgMCAxIDItMmgxNGEyIDIgMCAwIDEgMiAyeiIvPjwvc3ZnPg=='
-                        });
-                    }
+                showToast(`New message from ${m.username}`);
+                
+                if (document.hidden && "Notification" in window && Notification.permission === "granted" && !document.body.classList.contains('school-mode')) {
+                    new Notification(`New message from ${m.username}`, { 
+                        body: m.content,
+                        icon: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzYzNjZmMSIgZD0iTTIxIDE1YTIgMiAwIDAgMS0yIDJIN2wtNCA0VjVhMiAyIDAgMCAxIDItMmgxNGEyIDIgMCAwIDEgMiAyeiIvPjwvc3ZnPg=='
+                    });
                 }
             }
             knownMessageIds.add(m.id);
@@ -347,7 +449,7 @@
             } else {
                 html += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}" ${isMe ? `onclick="deleteMessage('${m.id}')" title="Click to delete"` : ''}>
                     <span class="msg-sender">${m.username}</span>
-                    ${m.content}
+                    <span class="msg-text">${m.content}</span>
                     <span class="time">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
                 </div>`;
             }
@@ -375,11 +477,17 @@
     }
 
     async function loadChatHub() {
-        const { data } = await _supabase.from('messages').select('room_id').order('created_at', {descending: true});
-        const dbRooms = data?.map(d => d.room_id) || [];
-        const savedRooms = getSavedRooms();
-        const uniqueRooms = [...new Set([...dbRooms, ...savedRooms])];
+        const { data } = await _supabase.from('messages').select('room_id').order('created_at', {descending: true}).limit(1000);
         
+        if (data) {
+            data.forEach(d => {
+                if (d.room_id.startsWith('global_') || d.room_id.includes(myUser)) {
+                    saveRoomLocally(d.room_id);
+                }
+            });
+        }
+        
+        const uniqueRooms = getSavedRooms();
         const list = document.getElementById('chat-list');
         
         let publicHtml = `<div class="section-label">Public Channels</div>`;
@@ -423,7 +531,26 @@
         } 
     }
     
-    function toggleTheme() { document.body.classList.toggle('light-mode'); }
+    function toggleTheme() { 
+        document.body.classList.remove('school-mode'); // Turn off school mode if changing standard theme
+        document.body.classList.toggle('light-mode'); 
+    }
+
+    // Toggle Boss Key / School Mode
+    function toggleSchoolMode() {
+        document.body.classList.remove('light-mode'); // Force dark GitHub look
+        document.body.classList.toggle('school-mode');
+        const btn = document.getElementById('nav-school');
+        
+        if (document.body.classList.contains('school-mode')) {
+            btn.classList.add('active-nav');
+            document.title = "Localhost:3000 - Index.js"; // Change tab title
+        } else {
+            btn.classList.remove('active-nav');
+            document.title = "Vault Chat Pro"; // Restore tab title
+        }
+    }
+
     async function logout() { await _supabase.auth.signOut(); location.reload(); }
 </script>
 </body>
