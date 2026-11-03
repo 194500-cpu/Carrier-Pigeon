@@ -38,93 +38,6 @@
             --other-msg-text: #0f172a;
         }
 
-        /* --- GMAIL DISGUISE MODE --- */
-        body.gmail-mode {
-            --bg: #ffffff; 
-            --sidebar: #f6f8fc; 
-            --card: #ffffff; 
-            --input: #f1f3f4; 
-            --border: #e0e0e0; 
-            --text: #202124; 
-            --text-muted: #5f6368;
-            --header: #202124; 
-            --user-msg: transparent; 
-            --other-msg: transparent;
-            --other-msg-text: #202124;
-            --font: Arial, Helvetica, sans-serif;
-            --primary: #c2e7ff; /* Gmail light blue selection */
-            --primary-hover: #b3d4ec;
-        }
-        
-        body.gmail-mode .avatar-public, 
-        body.gmail-mode .avatar-dm { 
-            background: #e1e3e1; 
-            color: #444746;
-            border-radius: 50%;
-            font-size: 14px;
-        }
-        
-        body.gmail-mode .chat-card {
-            border-radius: 0;
-            border-bottom: 1px solid #f1f3f4;
-            padding: 10px 14px;
-        }
-        
-        body.gmail-mode .active-chat {
-            background: var(--primary);
-            border-radius: 24px;
-            border-bottom: none;
-            box-shadow: none;
-        }
-        
-        body.gmail-mode .msg {
-            max-width: 100%;
-            border-radius: 0;
-            box-shadow: none;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-            display: grid;
-            grid-template-columns: 100px 1fr 60px;
-            align-items: start;
-            gap: 12px;
-        }
-        
-        body.gmail-mode .msg-me, 
-        body.gmail-mode .msg-other {
-            color: var(--text);
-            text-align: left;
-        }
-        
-        body.gmail-mode .msg-sender {
-            color: #202124;
-            margin-bottom: 0;
-            font-weight: 700;
-            font-size: 13px;
-            text-transform: none;
-        }
-        
-        body.gmail-mode .msg-me .msg-sender {
-            color: #202124;
-            text-align: left;
-        }
-        
-        body.gmail-mode .msg-text {
-            color: #5f6368;
-            font-size: 13px;
-        }
-
-        body.gmail-mode .time {
-            margin-top: 0;
-            font-weight: 600;
-            color: #5f6368;
-            text-align: right;
-        }
-
-        body.gmail-mode input { border-radius: 24px; border: none; background: #eaf1fb; padding: 12px 20px; }
-        body.gmail-mode button { border-radius: 24px; color: #001d35; }
-        body.gmail-mode button.secondary { background: #ffffff; color: #0b57d0; border: 1px solid #747775; }
-        /* -------------------------------------- */
-        
         * { box-sizing: border-box; }
         
         body { 
@@ -144,9 +57,11 @@
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
+        #app-container { display: flex; flex: 1; width: 100%; height: 100%; }
+
+        /* --- STANDARD CHAT UI --- */
         .rail { width: 72px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 24px; flex-shrink: 0; z-index: 10; }
         .rail-item { width: 48px; height: 48px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; opacity: 0.5; color: inherit; transition: all 0.2s ease; }
-        .rail-item span { font-size: 9px; font-weight: 700; margin-top: 4px; letter-spacing: 0.5px; }
         .rail-item:hover { background: var(--input); opacity: 1; transform: translateY(-2px); }
         .active-nav { background: var(--primary); color: var(--header); opacity: 1; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
 
@@ -171,7 +86,6 @@
         #output { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 16px; height: 0; }
         
         .msg { padding: 12px 18px; border-radius: 18px; max-width: 85%; font-size: 15px; line-height: 1.5; position: relative; cursor: pointer; transition: transform 0.1s, opacity 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .msg:active { transform: scale(0.98); opacity: 0.8; }
         .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 4px; }
         .msg-other { align-self: flex-start; background: var(--other-msg); color: var(--other-msg-text); border-bottom-left-radius: 4px; }
         .msg-sender { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block; text-transform: capitalize; }
@@ -179,48 +93,139 @@
         .time { font-size: 10px; opacity: 0.6; margin-top: 6px; display: block; text-align: right; }
 
         .input-area { padding: 20px 30px; background: var(--bg); display: flex; gap: 12px; flex-shrink: 0; border-top: 1px solid var(--border); }
-        input { background: var(--input); border: 1px solid var(--border); color: var(--text); padding: 14px 18px; border-radius: 12px; outline: none; flex: 1; font-size: 15px; transition: border 0.2s, box-shadow 0.2s; font-family: inherit; width: 100%; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
-        input::placeholder { color: var(--text-muted); }
+        input { background: var(--input); border: 1px solid var(--border); color: var(--text); padding: 14px 18px; border-radius: 12px; outline: none; flex: 1; font-size: 15px; width: 100%; }
         
-        button { border: none; padding: 14px 24px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; background: var(--primary); color: white; transition: all 0.2s; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        button:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        button { border: none; padding: 14px 24px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; background: var(--primary); color: white; transition: all 0.2s; }
+        button:hover { background: var(--primary-hover); }
         button.secondary { background: var(--input); color: var(--text); border: 1px solid var(--border); }
-        button.secondary:hover { background: var(--border); }
         button.danger { background: transparent; color: #ef4444; border: 1px solid var(--border); }
-        button.danger:hover { background: rgba(239, 68, 68, 0.1); border-color: #ef4444; }
 
         .action-buttons { display: flex; gap: 8px; margin-top: 12px; }
         .action-buttons button { flex: 1; padding: 10px; font-size: 12px; border-radius: 8px; }
 
-        #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s; }
-        .auth-card { width: 360px; max-width: 90%; padding: 40px; background: var(--sidebar); border: 1px solid var(--border); border-radius: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        /* --- AUTH & OVERLAYS --- */
+        #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .auth-card { width: 360px; padding: 40px; background: var(--sidebar); border: 1px solid var(--border); border-radius: 24px; text-align: center; }
         .auth-card h2 { margin: 0 0 24px; color: var(--header); font-size: 28px; font-weight: 700; }
-        .auth-card input { width: 100%; margin-bottom: 16px; }
+        .auth-card input { width: 100%; margin-bottom: 16px; border-radius: 8px; }
 
         #settings-view { padding: 40px; max-width: 600px; margin: 0 auto; width: 100%; }
-        #settings-view h2 { margin-top: 0; color: var(--header); font-size: 28px; margin-bottom: 24px; }
         .settings-card { background: var(--sidebar); padding: 24px; border-radius: 16px; border: 1px solid var(--border); }
 
-        /* In-App Toast Notification */
         #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: var(--primary); color: white; padding: 14px 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); font-size: 14px; font-weight: 500; transform: translateX(120%); opacity: 0; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); display: flex; align-items: center; gap: 10px; }
+        .toast { background: var(--primary); color: white; padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; transform: translateX(120%); opacity: 0; transition: all 0.4s; }
         .toast.show { transform: translateX(0); opacity: 1; }
 
-        @media (max-width: 768px) {
-            .inbox { width: 250px; }
-            .msg { max-width: 90%; }
-            .input-area { padding: 15px; }
-            .main-header { padding: 0 15px; }
+        /* =========================================
+           GMAIL CLUTTER MODE (THE BOSS KEY)
+           ========================================= */
+        #gmail-topbar { display: none; }
+        #gmail-sidebar-clutter { display: none; }
+        #gmail-fake-toolbar { display: none; }
+        
+        body.gmail-mode {
+            flex-direction: column;
+            --bg: #ffffff; 
+            --sidebar: #f6f8fc; 
+            --text: #202124; 
+            --border: #e0e0e0;
+            --font: Arial, Helvetica, sans-serif;
         }
-        @media (max-width: 500px) {
-            #home-view { flex-direction: column; }
-            .inbox { width: 100%; height: 40%; border-right: none; border-bottom: 1px solid var(--border); }
-            .view-container { height: 60%; }
+
+        body.gmail-mode #app-container { flex-direction: row; }
+        body.gmail-mode .rail { display: none; } /* Hide emoji sidebar */
+        
+        /* Gmail Header */
+        body.gmail-mode #gmail-topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 20px; background: white; border-bottom: 1px solid var(--border);
+            height: 64px; flex-shrink: 0;
         }
+        .g-logo { display: flex; align-items: center; gap: 16px; font-size: 22px; color: #5f6368; width: 238px; }
+        .g-logo img { height: 40px; }
+        .g-search { flex: 1; max-width: 720px; background: #eaf1fb; border-radius: 24px; display: flex; align-items: center; padding: 0 16px; height: 48px; gap: 12px; }
+        .g-search input { background: transparent; border: none; font-size: 16px; outline: none; width: 100%; color: #202124; padding: 0; }
+        .g-icons { display: flex; align-items: center; gap: 16px; font-size: 20px; color: #5f6368; }
+        .g-profile { width: 32px; height: 32px; background: #8e24aa; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; }
+
+        /* Gmail Sidebar Clutter */
+        body.gmail-mode .inbox { width: 256px; background: #f6f8fc; border-right: none; padding-top: 16px; }
+        body.gmail-mode .inbox-header { display: none; } /* Hide real header */
+        body.gmail-mode #gmail-sidebar-clutter { display: block; padding-right: 16px; }
+        
+        .g-compose { background: #c2e7ff; color: #001d35; border-radius: 16px; padding: 16px 24px; font-weight: 500; font-size: 14px; display: inline-flex; align-items: center; gap: 12px; margin: 0 0 16px 16px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .g-compose:hover { background: #b3d4ec; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+        
+        .g-folder { display: flex; align-items: center; gap: 16px; padding: 8px 12px 8px 24px; border-radius: 0 16px 16px 0; color: #202124; cursor: pointer; font-size: 14px; margin-bottom: 2px; }
+        .g-folder:hover { background: #e8eaed; }
+        .g-folder.active { background: #d3e3fd; color: #041e49; font-weight: bold; }
+        .g-folder svg { width: 20px; height: 20px; fill: #5f6368; }
+        .g-folder.active svg { fill: #041e49; }
+        .g-unread { margin-left: auto; font-size: 12px; font-weight: bold; }
+
+        /* Adjust Chat List to look like labels */
+        body.gmail-mode .section-label { color: #202124; font-size: 14px; font-weight: 500; text-transform: none; padding: 16px 0 8px 24px; letter-spacing: 0; }
+        body.gmail-mode .chat-card { border-radius: 0 16px 16px 0; padding: 6px 12px 6px 24px; gap: 12px; margin: 0 16px 0 0; }
+        body.gmail-mode .chat-card:hover { background: #e8eaed; }
+        body.gmail-mode .active-chat { background: #d3e3fd; box-shadow: none; border: none; }
+        body.gmail-mode .avatar-public, body.gmail-mode .avatar-dm { display: none; } /* Hide avatars in sidebar */
+        body.gmail-mode .chat-card b::before { content: "🏷️ "; font-size: 12px; opacity: 0.6; margin-right: 8px; }
+
+        /* Main View Structure */
+        body.gmail-mode .view-container { background: white; border-radius: 16px; margin: 0 16px 16px 0; border: 1px solid transparent; }
+        body.gmail-mode .main-header { display: none; } /* Hide standard header */
+        
+        /* Fake Gmail Action Toolbar */
+        body.gmail-mode #gmail-fake-toolbar { display: flex; align-items: center; padding: 12px 24px; gap: 20px; border-bottom: 1px solid var(--border); background: white; border-radius: 16px 16px 0 0; }
+        .g-tool-icon { width: 20px; height: 20px; fill: #5f6368; cursor: pointer; }
+        .g-tool-icon:hover { fill: #202124; }
+        
+        /* Message Area formatting */
+        body.gmail-mode #output { padding: 24px 40px; background: white; border-radius: 16px; }
+        body.gmail-mode .g-subject-line { font-size: 22px; font-weight: 400; color: #202124; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+        body.gmail-mode .g-subject-line span { font-size: 12px; background: #e8eaed; padding: 2px 6px; border-radius: 4px; color: #5f6368; }
+
+        /* Individual Email (Message) Styling */
+        .g-email-wrapper { margin-bottom: 16px; }
+        .g-email-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; position: relative; }
+        .g-avatar { width: 40px; height: 40px; border-radius: 50%; background: #00796b; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; flex-shrink: 0; }
+        .g-sender-info { flex: 1; }
+        .g-sender-name { font-size: 14px; font-weight: bold; color: #202124; margin-right: 4px; }
+        .g-sender-email { font-size: 12px; color: #5f6368; }
+        .g-to-me { font-size: 12px; color: #5f6368; margin-top: 2px; cursor: pointer; }
+        .g-time-actions { font-size: 12px; color: #5f6368; display: flex; align-items: center; gap: 12px; }
+        .g-email-body { padding-left: 52px; font-size: 14px; color: #202124; line-height: 1.5; padding-bottom: 16px; border-bottom: 1px solid #f1f3f4; }
+        
+        /* Fake Gmail Reply Box */
+        body.gmail-mode .input-area { background: white; border: none; border-top: none; padding: 0 40px 40px 92px; display: block; }
+        body.gmail-mode .g-reply-box { border: 1px solid #e0e0e0; border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        body.gmail-mode input { border: none; background: transparent; padding: 16px 20px; border-radius: 0; font-size: 14px; color: #202124; }
+        body.gmail-mode input:focus { box-shadow: none; }
+        body.gmail-mode .g-reply-tools { background: #f8f9fa; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e0e0e0; }
+        body.gmail-mode button { background: #0b57d0; border-radius: 18px; padding: 8px 24px; font-size: 14px; }
+        body.gmail-mode button:hover { background: #084298; transform: none; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
+
+<!-- GMAIL FAKE TOP BAR -->
+<header id="gmail-topbar">
+    <div class="g-logo">
+        <svg focusable="false" viewBox="0 0 24 24" style="width:24px; height:24px; fill:#5f6368; cursor:pointer;"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+        <img src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r5.png" alt="Gmail">
+    </div>
+    <div class="g-search">
+        <svg focusable="false" viewBox="0 0 24 24" style="width:20px; height:20px; fill:#5f6368;"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>
+        <input type="text" placeholder="Search mail" onkeydown="if(event.key==='Enter') document.getElementById('target-input').value = this.value; if(event.key==='Enter') startChat('global');">
+        <svg focusable="false" viewBox="0 0 24 24" style="width:20px; height:20px; fill:#5f6368; cursor:pointer;"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"></path></svg>
+    </div>
+    <div class="g-icons">
+        <span>❓</span>
+        <span>⚙️</span>
+        <span>▦</span>
+        <div class="g-profile" onclick="toggleGmailMode()" title="Exit Boss Key">V</div>
+    </div>
+</header>
 
 <div id="auth-overlay">
     <div class="auth-card">
@@ -228,86 +233,121 @@
         <input type="text" id="auth-user" placeholder="Username">
         <input type="password" id="auth-pass" placeholder="Password">
         <button onclick="handleAuth()" style="width:100%; margin-top: 8px; font-size: 16px;">Sign In</button>
-        <p style="font-size:13px; margin-top:20px; cursor:pointer; color: var(--text-muted); transition: 0.2s;" onclick="toggleAuthMode()">New? Create Account</p>
+        <p style="font-size:13px; margin-top:20px; cursor:pointer; color: var(--text-muted);" onclick="toggleAuthMode()">New? Create Account</p>
     </div>
 </div>
 
-<nav class="rail">
-    <div class="rail-item active-nav" id="nav-home" onclick="navTo('home')" title="Messages">💬</div>
-    <div class="rail-item" id="nav-settings" onclick="navTo('settings')" title="Settings">⚙️</div>
-    <div class="rail-item" id="nav-school" onclick="toggleGmailMode()" title="Boss Key" style="margin-top:auto; font-size: 22px;">✉️</div>
-    <div class="rail-item" style="color:#ef4444;" onclick="logout()" title="Logout">🚪</div>
-</nav>
+<div id="app-container">
+    <!-- STANDARD CHAT NAV -->
+    <nav class="rail">
+        <div class="rail-item active-nav" id="nav-home" onclick="navTo('home')" title="Messages">💬</div>
+        <div class="rail-item" id="nav-settings" onclick="navTo('settings')" title="Settings">⚙️</div>
+        <div class="rail-item" id="nav-school" onclick="toggleGmailMode()" title="Boss Key" style="margin-top:auto; font-size: 22px;">✉️</div>
+        <div class="rail-item" style="color:#ef4444;" onclick="logout()" title="Logout">🚪</div>
+    </nav>
 
-<section id="home-view" style="flex:1; display:flex;">
-    <aside class="inbox">
-        <div class="inbox-header">
-            <h3 id="inbox-title">Messages</h3>
-            <input type="text" id="target-input" placeholder="Enter username or topic...">
-            <div class="action-buttons">
-                <button id="btn-dm" onclick="startChat('private')" class="secondary">Start DM</button>
-                <button id="btn-public" onclick="startChat('global')" style="background: linear-gradient(135deg, #a855f7, #ec4899); border:none;">Create Public</button>
+    <section id="home-view" style="flex:1; display:flex;">
+        <aside class="inbox">
+            <div class="inbox-header">
+                <h3 id="inbox-title">Messages</h3>
+                <input type="text" id="target-input" placeholder="Enter username or topic...">
+                <div class="action-buttons">
+                    <button id="btn-dm" onclick="startChat('private')" class="secondary">Start DM</button>
+                    <button id="btn-public" onclick="startChat('global')" style="background: linear-gradient(135deg, #a855f7, #ec4899); border:none;">Create Public</button>
+                </div>
             </div>
-        </div>
-        <div id="chat-list"></div>
-    </aside>
+            
+            <!-- GMAIL FAKE SIDEBAR FOLDERS -->
+            <div id="gmail-sidebar-clutter">
+                <div class="g-compose">
+                    <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#041e49" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg>
+                    Compose
+                </div>
+                <div class="g-folder active">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H4.99C3.88 3 3.01 3.89 3.01 5L3 19c0 1.1.88 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12h-4c0 1.66-1.35 3-3 3s-3-1.34-3-3H4.99V5H19v10z"></path></svg>
+                    Inbox <span class="g-unread">1</span>
+                </div>
+                <div class="g-folder">
+                    <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                    Starred
+                </div>
+                <div class="g-folder">
+                    <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"></path></svg>
+                    Snoozed
+                </div>
+                <div class="g-folder">
+                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+                    Sent
+                </div>
+            </div>
 
-    <main class="view-container">
-        <div id="chat-active-ui" style="display:none; flex-direction:column; height:100%;">
-            <header class="main-header">
-                <h3 id="chat-title">---</h3>
-                <button class="danger" style="padding: 8px 16px; font-size: 12px; border-radius: 8px;" onclick="deleteCurrentChat()">Clear History</button>
-            </header>
-            <div id="output"></div>
-            <div class="input-area">
-                <input type="text" id="msg" placeholder="Type a message..." autocomplete="off">
-                <button onclick="sendMsg()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                </button>
-            </div>
-        </div>
-        <div id="empty-state" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.4;">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-            <p style="font-size: 16px; font-weight: 500;">Select a conversation</p>
-        </div>
-    </main>
-</section>
+            <div id="chat-list"></div>
+        </aside>
 
-<section id="settings-view" style="flex:1; display:none;">
-    <h2>Settings</h2>
-    <div class="settings-card">
-        <p style="margin-top: 0;">Logged in as: <b id="display-user" style="color: var(--primary); font-size: 18px;">---</b></p>
-        <hr style="border: none; border-top: 1px solid var(--border); margin: 24px 0;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h4 style="margin: 0 0 8px; color: var(--header);">Appearance</h4>
-                <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Switch between light and dark mode</p>
+        <main class="view-container">
+            <div id="chat-active-ui" style="display:none; flex-direction:column; height:100%;">
+                
+                <!-- STANDARD HEADER -->
+                <header class="main-header">
+                    <h3 id="chat-title">---</h3>
+                    <button class="danger" style="padding: 8px 16px; font-size: 12px; border-radius: 8px;" onclick="deleteCurrentChat()">Clear History</button>
+                </header>
+
+                <!-- GMAIL FAKE TOOLBAR -->
+                <div id="gmail-fake-toolbar">
+                    <svg class="g-tool-icon" viewBox="0 0 24 24" onclick="deleteCurrentChat()" title="Back to Inbox"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg>
+                    <svg class="g-tool-icon" viewBox="0 0 24 24"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12.14l.81 1H5.12z"></path></svg>
+                    <svg class="g-tool-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>
+                    <svg class="g-tool-icon" viewBox="0 0 24 24" onclick="deleteCurrentChat()" title="Delete"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>
+                    <div style="width: 1px; height: 20px; background: #e0e0e0; margin: 0 8px;"></div>
+                    <svg class="g-tool-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"></path></svg>
+                </div>
+
+                <div id="output"></div>
+                
+                <div class="input-area">
+                    <div id="gmail-reply-container" class="g-reply-box" style="display:none; width: 100%;">
+                        <input type="text" id="msg-g" placeholder="Reply..." autocomplete="off">
+                        <div class="g-reply-tools">
+                            <button onclick="sendMsg('msg-g')">Send</button>
+                            <svg viewBox="0 0 24 24" style="width:20px; height:20px; fill:#5f6368; cursor:pointer;" onclick="deleteCurrentChat()"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>
+                        </div>
+                    </div>
+                    <input type="text" id="msg" placeholder="Type a message..." autocomplete="off">
+                    <button id="send-btn" onclick="sendMsg('msg')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
             </div>
-            <button onclick="toggleTheme()" class="secondary" style="border-radius: 8px;">🌓 Toggle Theme</button>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px;">
-            <div>
-                <h4 style="margin: 0 0 8px; color: var(--header);">Notifications</h4>
-                <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Enable browser push notifications</p>
+            <div id="empty-state" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.4;">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <p style="font-size: 16px; font-weight: 500;">Select a conversation</p>
             </div>
-            <button onclick="requestNotificationPermission()" class="secondary" style="border-radius: 8px;">🔔 Enable</button>
+        </main>
+    </section>
+
+    <section id="settings-view" style="flex:1; display:none;">
+        <h2>Settings</h2>
+        <div class="settings-card">
+            <p style="margin-top: 0;">Logged in as: <b id="display-user" style="color: var(--primary); font-size: 18px;">---</b></p>
+            <hr style="border: none; border-top: 1px solid var(--border); margin: 24px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h4 style="margin: 0 0 8px; color: var(--header);">Appearance</h4>
+                    <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Switch between light and dark mode</p>
+                </div>
+                <button onclick="toggleTheme()" class="secondary" style="border-radius: 8px;">🌓 Toggle Theme</button>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
+</div>
 
 <div id="toast-container"></div>
 
 <script>
-    window.onerror = function(msg, url, line) {
-        alert("System Error on line " + line + ": " + msg);
-        return false;
-    };
-
-    let _supabase, myUser = "", activeRoom = "", chatInterval = null, authMode = 'login';
+    let _supabase, myUser = "", activeRoom = "", chatInterval = null, authMode = 'login', currentChatTitle = "";
     let knownMessageIds = new Set();
     let isFirstLoad = true;
-    
-    // Notification Audio Ping
     const alertSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -316,16 +356,16 @@
             const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsZmRnZ3ppbG5kdnRieWZxYmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNDUwOTgsImV4cCI6MjA4NzYyMTA5OH0.XlzFZSAimDc2SxEAwGn18wqEtDF3mqzYe6nW93OzZpU';
             _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             
-            document.getElementById('msg').addEventListener('keydown', e => e.key === 'Enter' && sendMsg());
+            document.getElementById('msg').addEventListener('keydown', e => e.key === 'Enter' && sendMsg('msg'));
+            document.getElementById('msg-g').addEventListener('keydown', e => e.key === 'Enter' && sendMsg('msg-g'));
             checkUser();
         } catch(err) {
             alert("Failed to connect to database: " + err.message);
         }
     });
 
-    // Custom In-App Toast Notification
     function showToast(message) {
-        if (document.body.classList.contains('gmail-mode')) return; // Mute toasts in disguise mode
+        if (document.body.classList.contains('gmail-mode')) return; 
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
         toast.className = 'toast';
@@ -334,18 +374,11 @@
         
         void toast.offsetWidth; 
         toast.classList.add('show');
-        alertSound.play().catch(e => console.log("Audio play blocked by browser", e));
-
+        alertSound.play().catch(e => {});
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 400); 
         }, 3000);
-    }
-
-    function requestNotificationPermission() {
-        if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-            Notification.requestPermission();
-        }
     }
 
     function getSavedRooms() {
@@ -371,44 +404,27 @@
         authMode = authMode === 'login' ? 'signup' : 'login'; 
         const btn = document.querySelector('.auth-card button');
         const toggleText = document.querySelector('.auth-card p');
-        
-        if (authMode === 'signup') {
-            btn.innerText = 'Sign Up';
-            toggleText.innerText = 'Already have an account? Sign In';
-        } else {
-            btn.innerText = 'Sign In';
-            toggleText.innerText = 'New? Create Account';
-        }
+        if (authMode === 'signup') { btn.innerText = 'Sign Up'; toggleText.innerText = 'Already have an account? Sign In'; } 
+        else { btn.innerText = 'Sign In'; toggleText.innerText = 'New? Create Account'; }
     }
 
     async function handleAuth() {
         const u = document.getElementById('auth-user').value.trim();
         const p = document.getElementById('auth-pass').value;
         if (!u || !p) return alert("Please enter both username and password.");
-
         const email = u + '@chat.com';
-        const { error } = await (authMode === 'login' 
-            ? _supabase.auth.signInWithPassword({ email, password: p }) 
-            : _supabase.auth.signUp({ email, password: p }));
-            
-        if (error) {
-            alert(error.message);
-        } else {
-            if (authMode === 'signup') alert("Account created successfully!");
-            checkUser();
-        }
+        const { error } = await (authMode === 'login' ? _supabase.auth.signInWithPassword({ email, password: p }) : _supabase.auth.signUp({ email, password: p }));
+        if (error) alert(error.message); else { if (authMode === 'signup') alert("Account created!"); checkUser(); }
     }
 
     async function checkUser() {
         const { data: { user } } = await _supabase.auth.getUser();
         if (user) {
             myUser = user.email.split('@')[0];
-            document.getElementById('auth-overlay').style.opacity = '0';
-            setTimeout(() => document.getElementById('auth-overlay').style.display = 'none', 300);
+            document.getElementById('auth-overlay').style.display = 'none';
             document.getElementById('display-user').innerText = myUser;
-            
+            document.querySelector('.g-profile').innerText = myUser.charAt(0).toUpperCase();
             saveRoomLocally('global_General'); 
-            requestNotificationPermission(); 
             loadChatHub();
         }
     }
@@ -424,17 +440,17 @@
 
     function openChat(rid, title) {
         activeRoom = rid;
+        currentChatTitle = title.replace('global_', '# ');
         knownMessageIds.clear(); 
         isFirstLoad = true;
         
         document.getElementById('empty-state').style.display = 'none';
         document.getElementById('chat-active-ui').style.display = 'flex';
-        document.getElementById('chat-title').innerText = title.replace('global_', '# ');
+        document.getElementById('chat-title').innerText = currentChatTitle;
         
         loadMessages();
         if(chatInterval) clearInterval(chatInterval);
         chatInterval = setInterval(loadMessages, 3000);
-        
         loadChatHub(); 
     }
 
@@ -443,31 +459,54 @@
         const { data } = await _supabase.from('messages').select('*').eq('room_id', activeRoom).order('created_at', {ascending: true});
         const out = document.getElementById('output');
         const isAtBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 50;
+        const isGmail = document.body.classList.contains('gmail-mode');
 
         let html = '';
+        
+        if (isGmail && data && data.length > 0) {
+            html += `<div class="g-subject-line">${currentChatTitle} <span>Inbox x</span></div>`;
+        }
+
         (data || []).forEach(m => {
             const isMe = m.username === myUser;
-            
-            if (!isFirstLoad && !knownMessageIds.has(m.id) && !isMe) {
-                showToast(`New message from ${m.username}`);
-                
-                if (document.hidden && "Notification" in window && Notification.permission === "granted" && !document.body.classList.contains('gmail-mode')) {
-                    new Notification(`New message from ${m.username}`, { 
-                        body: m.content,
-                        icon: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzYzNjZmMSIgZD0iTTIxIDE1YTIgMiAwIDAgMS0yIDJIN2wtNCA0VjVhMiAyIDAgMCAxIDItMmgxNGEyIDIgMCAwIDEgMiAyeiIvPjwvc3ZnPg=='
-                    });
-                }
-            }
+            if (!isFirstLoad && !knownMessageIds.has(m.id) && !isMe) showToast(`New message from ${m.username}`);
             knownMessageIds.add(m.id);
 
-            if(m.username === 'System') {
-                html += `<div style="text-align:center; font-size:11px; color:var(--text-muted); margin:10px 0;">${m.content}</div>`;
-            } else {
-                html += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}" ${isMe ? `onclick="deleteMessage('${m.id}')" title="Click to delete"` : ''}>
-                    <span class="msg-sender">${m.username}</span>
-                    <span class="msg-text">${m.content}</span>
-                    <span class="time">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+            const timeStr = new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            const dateStr = new Date(m.created_at).toLocaleDateString([], {month:'short', day:'numeric'});
+
+            if (isGmail) {
+                // Render as Gmail Email Thread item
+                const avatarColor = isMe ? '#8e24aa' : '#00796b';
+                html += `
+                <div class="g-email-wrapper">
+                    <div class="g-email-header">
+                        <div class="g-avatar" style="background: ${avatarColor}">${m.username.charAt(0).toUpperCase()}</div>
+                        <div class="g-sender-info">
+                            <span class="g-sender-name">${isMe ? 'me' : m.username}</span> 
+                            <span class="g-sender-email">&lt;${m.username.toLowerCase()}@internal.com&gt;</span>
+                            <div class="g-to-me">to me ▾</div>
+                        </div>
+                        <div class="g-time-actions">
+                            ${dateStr}, ${timeStr} 
+                            <span style="font-size:16px; cursor:pointer;" title="Star">☆</span>
+                            <svg viewBox="0 0 24 24" style="width:18px; height:18px; fill:#5f6368; cursor:pointer;"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"></path></svg>
+                            <span style="font-size:16px; cursor:pointer;" onclick="deleteMessage('${m.id}')" title="Delete">⋮</span>
+                        </div>
+                    </div>
+                    <div class="g-email-body">${m.content}</div>
                 </div>`;
+            } else {
+                // Render as Standard Chat Bubble
+                if(m.username === 'System') {
+                    html += `<div style="text-align:center; font-size:11px; color:var(--text-muted); margin:10px 0;">${m.content}</div>`;
+                } else {
+                    html += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}" ${isMe ? `onclick="deleteMessage('${m.id}')" title="Click to delete"` : ''}>
+                        <span class="msg-sender">${m.username}</span>
+                        <span class="msg-text">${m.content}</span>
+                        <span class="time">${timeStr}</span>
+                    </div>`;
+                }
             }
         });
         
@@ -483,8 +522,8 @@
         }
     }
 
-    async function sendMsg() {
-        const input = document.getElementById('msg');
+    async function sendMsg(inputId) {
+        const input = document.getElementById(inputId);
         if(!input.value.trim()) return;
         saveRoomLocally(activeRoom);
         await _supabase.from('messages').insert([{ content: input.value, username: myUser, room_id: activeRoom }]);
@@ -493,33 +532,23 @@
     }
 
     async function loadChatHub() {
-        const { data } = await _supabase.from('messages').select('room_id').order('created_at', {descending: true}).limit(1000);
-        
-        if (data) {
-            data.forEach(d => {
-                if (d.room_id.startsWith('global_') || d.room_id.includes(myUser)) {
-                    saveRoomLocally(d.room_id);
-                }
-            });
-        }
-        
         const uniqueRooms = getSavedRooms();
         const list = document.getElementById('chat-list');
         const isGmail = document.body.classList.contains('gmail-mode');
         
-        let publicHtml = `<div class="section-label">${isGmail ? 'Mailing Lists' : 'Public Channels'}</div>`;
-        let dmHtml = `<div class="section-label" style="margin-top:10px;">${isGmail ? 'Primary' : 'Direct Messages'}</div>`;
+        let publicHtml = `<div class="section-label">${isGmail ? 'Labels' : 'Public Channels'}</div>`;
+        let dmHtml = `<div class="section-label" style="margin-top:10px;">${isGmail ? 'Direct' : 'Direct Messages'}</div>`;
         
         uniqueRooms.forEach(r => {
             if (r.startsWith('global_') || r.includes(myUser)) {
                 const isGlobal = r.startsWith('global_');
                 const name = isGlobal ? r.replace('global_', '') : r.split('_').filter(n => n !== myUser)[0] || myUser;
-                const displayName = isGlobal ? `# ${name}` : name;
+                const displayName = isGlobal ? (isGmail ? name : `# ${name}`) : name;
                 
                 const cardHtml = `
                     <div class="chat-card ${activeRoom === r ? 'active-chat' : ''}" onclick="openChat('${r}', '${name}')">
-                        <div class="${isGlobal ? 'avatar-public' : 'avatar-dm'}">${isGlobal ? '#' : name.charAt(0)}</div>
-                        <b style="font-size: 14px; font-weight: 600; color: var(--text);">${displayName}</b>
+                        <div class="${isGlobal ? 'avatar-public' : 'avatar-dm'}">${isGlobal ? '#' : name.charAt(0).toUpperCase()}</div>
+                        <b style="font-size: 14px; font-weight: ${isGmail ? '500' : '600'}; color: var(--text);">${displayName}</b>
                     </div>`;
 
                 if (isGlobal) publicHtml += cardHtml;
@@ -537,7 +566,7 @@
     }
 
     async function deleteCurrentChat() { 
-        if(confirm("Clear history and remove this chat from your sidebar?")) { 
+        if(confirm("Archive this conversation?")) { 
             await _supabase.from('messages').delete().eq('room_id', activeRoom); 
             removeRoomLocally(activeRoom);
             activeRoom = "";
@@ -549,45 +578,29 @@
     }
     
     function toggleTheme() { 
-        if (document.body.classList.contains('gmail-mode')) {
-            toggleGmailMode(); // Turn off disguise first
-        }
+        if (document.body.classList.contains('gmail-mode')) toggleGmailMode(); 
         document.body.classList.toggle('light-mode'); 
     }
 
-    // Toggle Boss Key / Gmail Mode
     function toggleGmailMode() {
-        document.body.classList.remove('light-mode'); // Clear standard light mode toggle
+        document.body.classList.remove('light-mode'); 
         document.body.classList.toggle('gmail-mode');
         
         const isGmail = document.body.classList.contains('gmail-mode');
-        const btn = document.getElementById('nav-school');
+        
+        // Input switching
+        document.getElementById('msg').style.display = isGmail ? 'none' : 'block';
+        document.getElementById('send-btn').style.display = isGmail ? 'none' : 'flex';
+        document.getElementById('gmail-reply-container').style.display = isGmail ? 'flex' : 'none';
         
         if (isGmail) {
-            btn.classList.add('active-nav');
-            document.title = `Inbox (1) - ${myUser ? myUser : 'user'}@gmail.com - Gmail`;
-            document.getElementById('inbox-title').innerText = 'Inbox';
-            document.getElementById('btn-dm').innerText = 'Compose';
-            document.getElementById('btn-public').innerText = 'New Thread';
-            document.getElementById('btn-public').style.background = '#ffffff';
-            document.getElementById('btn-public').style.color = '#0b57d0';
-            document.getElementById('btn-public').style.border = '1px solid #747775';
-            document.getElementById('target-input').placeholder = 'Search mail...';
-            document.getElementById('msg').placeholder = 'Reply...';
+            document.title = `Inbox (1) - ${myUser ? myUser : 'user'}@internal.com - Gmail`;
         } else {
-            btn.classList.remove('active-nav');
-            document.title = "Vault Chat Pro";
-            document.getElementById('inbox-title').innerText = 'Messages';
-            document.getElementById('btn-dm').innerText = 'Start DM';
-            document.getElementById('btn-public').innerText = 'Create Public';
-            document.getElementById('btn-public').style.background = 'linear-gradient(135deg, #a855f7, #ec4899)';
-            document.getElementById('btn-public').style.color = 'white';
-            document.getElementById('btn-public').style.border = 'none';
-            document.getElementById('target-input').placeholder = 'Enter username or topic...';
-            document.getElementById('msg').placeholder = 'Type a message...';
+            document.title = "GMAIL";
         }
         
-        loadChatHub(); // Refresh the list labels to match mode
+        if (activeRoom) loadMessages(); 
+        loadChatHub(); 
     }
 
     async function logout() { await _supabase.auth.signOut(); location.reload(); }
