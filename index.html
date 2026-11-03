@@ -30,7 +30,6 @@
         .view-container { flex: 1; display: flex; flex-direction: column; background: var(--card); overflow: hidden; height: 100%; }
         .main-header { padding: 0 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; height: 65px; background: var(--sidebar); flex-shrink: 0; }
         
-        /* SCROLL FIX: height: 0 and flex: 1 ensures the container respects its parent's height */
         #output { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; height: 0; }
         
         .msg { padding: 10px 15px; border-radius: 15px; max-width: 70%; font-size: 14px; line-height: 1.4; position: relative; cursor: pointer; transition: 0.1s; }
@@ -109,13 +108,39 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let myUser = "", activeRoom = "", chatInterval = null, authMode = 'login';
 
-    function toggleAuthMode() { authMode = authMode === 'login' ? 'signup' : 'login'; }
+    function toggleAuthMode() { 
+        authMode = authMode === 'login' ? 'signup' : 'login'; 
+        const btn = document.querySelector('.auth-card button');
+        const toggleText = document.querySelector('.auth-card p');
+        
+        if (authMode === 'signup') {
+            btn.innerText = 'Sign Up';
+            toggleText.innerText = 'Already have an account? Sign In';
+        } else {
+            btn.innerText = 'Sign In';
+            toggleText.innerText = 'New? Create Account';
+        }
+    }
 
     async function handleAuth() {
         const u = document.getElementById('auth-user').value.trim();
         const p = document.getElementById('auth-pass').value;
-        const { error } = await (authMode === 'login' ? _supabase.auth.signInWithPassword({email: u+'@chat.com', password: p}) : _supabase.auth.signUp({email: u+'@chat.com', password: p}));
-        if (error) alert(error.message); else checkUser();
+        
+        if (!u || !p) return alert("Please enter both username and password.");
+
+        const email = u + '@chat.com';
+        const { data, error } = await (authMode === 'login' 
+            ? _supabase.auth.signInWithPassword({ email: email, password: p }) 
+            : _supabase.auth.signUp({ email: email, password: p }));
+            
+        if (error) {
+            alert(error.message);
+        } else {
+            if (authMode === 'signup') {
+                alert("Account created successfully!");
+            }
+            checkUser();
+        }
     }
 
     async function checkUser() {
@@ -157,7 +182,6 @@
         out.innerHTML = (data || []).map(m => {
             if(m.username === 'System') return `<div style="text-align:center; font-size:11px; opacity:0.3; margin:10px 0;">${m.content}</div>`;
             const isMe = m.username === myUser;
-            // Added individual delete logic here
             return `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}" ${isMe ? `onclick="deleteMessage('${m.id}')"` : ''}>
                 ${!isMe ? `<span class="msg-sender">${m.username}</span>` : ''}
                 ${m.content}
@@ -186,10 +210,8 @@
         const uniqueRooms = [...new Set(data?.map(d => d.room_id) || [])];
         const list = document.getElementById('chat-list');
         
-        // Always include General at the top if it exists, otherwise just headers
         let html = `<div class="section-label">Public</div>`;
         
-        // Ensure General is pinned or listed under public
         if (!uniqueRooms.includes('global_General')) {
             html += `<div class="chat-card ${activeRoom === 'global_General' ? 'active-chat' : ''}" onclick="openChat('global_General', 'General')">
                 <div style="width:30px; height:30px; border-radius:6px; background:#9b59b6; display:flex; align-items:center; justify-content:center; color:white; font-size:12px;">#</div>
@@ -202,7 +224,6 @@
                 const isGlobal = r.startsWith('global_');
                 const name = isGlobal ? r.replace('global_', '# ') : r.replace(myUser, '').replace('_','');
                 
-                // Group them by section
                 if (isGlobal) {
                    html += `<div class="chat-card ${activeRoom === r ? 'active-chat' : ''}" onclick="openChat('${r}', '${name}')">
                         <div style="width:30px; height:30px; border-radius:6px; background:#9b59b6; display:flex; align-items:center; justify-content:center; color:white; font-size:12px;">#</div>
