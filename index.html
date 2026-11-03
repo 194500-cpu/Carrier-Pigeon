@@ -109,7 +109,7 @@
         .auth-card h2 { margin: 0 0 24px; color: var(--header); font-size: 28px; font-weight: 700; }
         .auth-card input { width: 100%; margin-bottom: 16px; border-radius: 8px; }
 
-        /* Settings View Fixes */
+        /* Settings View */
         #settings-view { flex: 1; padding: 40px; overflow-y: auto; display: none; height: 100%; flex-direction: column; align-items: center; }
         .settings-content { max-width: 600px; width: 100%; }
         .settings-card { background: var(--sidebar); padding: 24px; border-radius: 16px; border: 1px solid var(--border); width: 100%; }
@@ -124,6 +124,7 @@
         #gmail-topbar { display: none; }
         #gmail-sidebar-clutter { display: none; }
         #gmail-fake-toolbar { display: none; }
+        #fake-empty-list { display: none; padding: 32px 16px; color: #5f6368; font-size: 14px; text-align: center; }
         
         body.gmail-mode {
             flex-direction: column;
@@ -156,7 +157,7 @@
         .g-compose { background: #c2e7ff; color: #001d35; border-radius: 16px; padding: 16px 24px; font-weight: 500; font-size: 14px; display: inline-flex; align-items: center; gap: 12px; margin: 0 0 16px 16px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .g-compose:hover { background: #b3d4ec; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
         
-        .g-folder { display: flex; align-items: center; gap: 16px; padding: 8px 12px 8px 24px; border-radius: 0 16px 16px 0; color: #202124; cursor: pointer; font-size: 14px; margin-bottom: 2px; }
+        .g-folder { display: flex; align-items: center; gap: 16px; padding: 8px 12px 8px 24px; border-radius: 0 16px 16px 0; color: #202124; cursor: pointer; font-size: 14px; margin-bottom: 2px; transition: background 0.1s; }
         .g-folder:hover { background: #e8eaed; }
         .g-folder.active { background: #d3e3fd; color: #041e49; font-weight: bold; }
         .g-folder svg { width: 20px; height: 20px; fill: #5f6368; }
@@ -262,25 +263,26 @@
                     <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#041e49" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg>
                     Compose
                 </div>
-                <div class="g-folder active">
+                <div class="g-folder active" onclick="switchGmailTab(this, 'Inbox')">
                     <svg viewBox="0 0 24 24"><path d="M19 3H4.99C3.88 3 3.01 3.89 3.01 5L3 19c0 1.1.88 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12h-4c0 1.66-1.35 3-3 3s-3-1.34-3-3H4.99V5H19v10z"></path></svg>
                     Inbox <span class="g-unread">1</span>
                 </div>
-                <div class="g-folder">
+                <div class="g-folder" onclick="switchGmailTab(this, 'Starred')">
                     <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
                     Starred
                 </div>
-                <div class="g-folder">
+                <div class="g-folder" onclick="switchGmailTab(this, 'Snoozed')">
                     <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"></path></svg>
                     Snoozed
                 </div>
-                <div class="g-folder">
+                <div class="g-folder" onclick="switchGmailTab(this, 'Sent')">
                     <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
                     Sent
                 </div>
             </div>
 
             <div id="chat-list"></div>
+            <div id="fake-empty-list"></div>
         </aside>
 
         <main class="view-container">
@@ -380,12 +382,10 @@
     function showToast(message) {
         if (document.body.classList.contains('gmail-mode')) return; 
         
-        // Native browser notification
         if ("Notification" in window && Notification.permission === "granted") {
             new Notification("Vault Chat", { body: message });
         }
 
-        // In-app UI Toast
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
         toast.className = 'toast';
@@ -396,13 +396,36 @@
         void toast.offsetWidth; 
         toast.classList.add('show');
         
-        // Play sound if possible
         alertSound.play().catch(e => { console.log("Audio autoplay prevented by browser."); });
         
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 400); 
         }, 3000);
+    }
+
+    function switchGmailTab(element, tabName) {
+        // Handle visual selection state
+        document.querySelectorAll('.g-folder').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+
+        const chatList = document.getElementById('chat-list');
+        const emptyList = document.getElementById('fake-empty-list');
+
+        if (tabName === 'Inbox') {
+            chatList.style.display = 'block';
+            emptyList.style.display = 'none';
+        } else {
+            // Hide chats and show convincing empty state
+            chatList.style.display = 'none';
+            emptyList.style.display = 'block';
+            emptyList.innerText = `No ${tabName.toLowerCase()} messages.`;
+            
+            // Clear current main view to sell the illusion of switching folders
+            activeRoom = "";
+            document.getElementById('chat-active-ui').style.display = 'none';
+            document.getElementById('empty-state').style.display = 'flex';
+        }
     }
 
     function getSavedRooms() {
@@ -443,9 +466,7 @@
             alert(error.message);
         } else { 
             if (authMode === 'signup') alert("Account created!"); 
-            // Ask for notifications exactly when the user clicks 'Sign In' (satisfies user interaction rule)
             requestNotificationPermission();
-            // Prime audio context
             alertSound.play().then(() => { alertSound.pause(); alertSound.currentTime = 0; }).catch(() => {});
             checkUser(); 
         }
@@ -635,8 +656,15 @@
         
         if (isGmail) {
             document.title = `Inbox (1) - ${myUser ? myUser : 'user'}@internal.com - Gmail`;
+            
+            // Ensure inbox is the active view when switching to Gmail mode
+            const inboxTab = document.querySelector('.g-folder:first-of-type');
+            if(inboxTab) switchGmailTab(inboxTab, 'Inbox');
+            
         } else {
             document.title = "Vault Chat Pro";
+            document.getElementById('chat-list').style.display = 'block';
+            document.getElementById('fake-empty-list').style.display = 'none';
         }
         
         if (activeRoom) loadMessages(); 
