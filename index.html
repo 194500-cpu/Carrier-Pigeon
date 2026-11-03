@@ -38,75 +38,91 @@
             --other-msg-text: #0f172a;
         }
 
-        /* --- SCHOOL / GITHUB DISGUISE MODE --- */
-        body.school-mode {
-            --bg: #0d1117; 
-            --sidebar: #010409; 
-            --card: #010409; 
-            --input: #0d1117; 
-            --border: #30363d; 
-            --text: #c9d1d9; 
-            --text-muted: #8b949e;
-            --header: #c9d1d9; 
+        /* --- GMAIL DISGUISE MODE --- */
+        body.gmail-mode {
+            --bg: #ffffff; 
+            --sidebar: #f6f8fc; 
+            --card: #ffffff; 
+            --input: #f1f3f4; 
+            --border: #e0e0e0; 
+            --text: #202124; 
+            --text-muted: #5f6368;
+            --header: #202124; 
             --user-msg: transparent; 
             --other-msg: transparent;
-            --other-msg-text: #c9d1d9;
-            --font: Consolas, "Courier New", monospace;
-            --primary: #238636;
-            --primary-hover: #2ea043;
+            --other-msg-text: #202124;
+            --font: Arial, Helvetica, sans-serif;
+            --primary: #c2e7ff; /* Gmail light blue selection */
+            --primary-hover: #b3d4ec;
         }
         
-        body.school-mode .avatar-public, 
-        body.school-mode .avatar-dm { display: none; }
-        
-        body.school-mode .chat-card::before {
-            content: '📄';
+        body.gmail-mode .avatar-public, 
+        body.gmail-mode .avatar-dm { 
+            background: #e1e3e1; 
+            color: #444746;
+            border-radius: 50%;
             font-size: 14px;
-            margin-right: 8px;
-            filter: grayscale(100%);
         }
         
-        body.school-mode .msg {
+        body.gmail-mode .chat-card {
+            border-radius: 0;
+            border-bottom: 1px solid #f1f3f4;
+            padding: 10px 14px;
+        }
+        
+        body.gmail-mode .active-chat {
+            background: var(--primary);
+            border-radius: 24px;
+            border-bottom: none;
+            box-shadow: none;
+        }
+        
+        body.gmail-mode .msg {
             max-width: 100%;
             border-radius: 0;
             box-shadow: none;
-            padding: 4px 0;
+            padding: 12px 0;
             border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
+            display: grid;
+            grid-template-columns: 100px 1fr 60px;
+            align-items: start;
             gap: 12px;
         }
         
-        body.school-mode .msg-me, 
-        body.school-mode .msg-other {
-            align-self: flex-start;
+        body.gmail-mode .msg-me, 
+        body.gmail-mode .msg-other {
             color: var(--text);
             text-align: left;
         }
         
-        body.school-mode .msg-sender {
-            color: #58a6ff;
+        body.gmail-mode .msg-sender {
+            color: #202124;
             margin-bottom: 0;
-            min-width: 100px;
+            font-weight: 700;
+            font-size: 13px;
             text-transform: none;
         }
         
-        body.school-mode .msg-me .msg-sender {
-            color: #7ee787;
+        body.gmail-mode .msg-me .msg-sender {
+            color: #202124;
             text-align: left;
         }
         
-        body.school-mode .time {
-            margin-top: 0;
-            margin-left: auto;
+        body.gmail-mode .msg-text {
+            color: #5f6368;
+            font-size: 13px;
         }
 
-        body.school-mode .inbox-header h3::before { content: 'Explorer: '; color: var(--text-muted); font-weight: normal; }
-        body.school-mode .main-header h3::before { content: 'main / '; color: #8b949e; font-weight: normal; }
-        
-        body.school-mode input { border-radius: 4px; }
-        body.school-mode button { border-radius: 4px; }
-        body.school-mode .rail-item { border-radius: 4px; font-size: 16px; }
+        body.gmail-mode .time {
+            margin-top: 0;
+            font-weight: 600;
+            color: #5f6368;
+            text-align: right;
+        }
+
+        body.gmail-mode input { border-radius: 24px; border: none; background: #eaf1fb; padding: 12px 20px; }
+        body.gmail-mode button { border-radius: 24px; color: #001d35; }
+        body.gmail-mode button.secondary { background: #ffffff; color: #0b57d0; border: 1px solid #747775; }
         /* -------------------------------------- */
         
         * { box-sizing: border-box; }
@@ -132,7 +148,7 @@
         .rail-item { width: 48px; height: 48px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; opacity: 0.5; color: inherit; transition: all 0.2s ease; }
         .rail-item span { font-size: 9px; font-weight: 700; margin-top: 4px; letter-spacing: 0.5px; }
         .rail-item:hover { background: var(--input); opacity: 1; transform: translateY(-2px); }
-        .active-nav { background: var(--primary); color: white; opacity: 1; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+        .active-nav { background: var(--primary); color: var(--header); opacity: 1; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
 
         .inbox { width: 320px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
         .inbox-header { padding: 24px 20px 16px; }
@@ -219,18 +235,18 @@
 <nav class="rail">
     <div class="rail-item active-nav" id="nav-home" onclick="navTo('home')" title="Messages">💬</div>
     <div class="rail-item" id="nav-settings" onclick="navTo('settings')" title="Settings">⚙️</div>
-    <div class="rail-item" id="nav-school" onclick="toggleSchoolMode()" title="Boss Key" style="margin-top:auto; font-size: 22px;">👨‍💻</div>
+    <div class="rail-item" id="nav-school" onclick="toggleGmailMode()" title="Boss Key" style="margin-top:auto; font-size: 22px;">✉️</div>
     <div class="rail-item" style="color:#ef4444;" onclick="logout()" title="Logout">🚪</div>
 </nav>
 
 <section id="home-view" style="flex:1; display:flex;">
     <aside class="inbox">
         <div class="inbox-header">
-            <h3>Workspace</h3>
-            <input type="text" id="target-input" placeholder="Enter collaborator or repo name...">
+            <h3 id="inbox-title">Messages</h3>
+            <input type="text" id="target-input" placeholder="Enter username or topic...">
             <div class="action-buttons">
-                <button onclick="startChat('private')" class="secondary">New Collaborator</button>
-                <button onclick="startChat('global')" style="background: linear-gradient(135deg, #a855f7, #ec4899); border:none;">New Repository</button>
+                <button id="btn-dm" onclick="startChat('private')" class="secondary">Start DM</button>
+                <button id="btn-public" onclick="startChat('global')" style="background: linear-gradient(135deg, #a855f7, #ec4899); border:none;">Create Public</button>
             </div>
         </div>
         <div id="chat-list"></div>
@@ -252,7 +268,7 @@
         </div>
         <div id="empty-state" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.4;">
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-            <p style="font-size: 16px; font-weight: 500;">Select a workspace</p>
+            <p style="font-size: 16px; font-weight: 500;">Select a conversation</p>
         </div>
     </main>
 </section>
@@ -309,7 +325,7 @@
 
     // Custom In-App Toast Notification
     function showToast(message) {
-        if (document.body.classList.contains('school-mode')) return; // Mute toasts in school mode
+        if (document.body.classList.contains('gmail-mode')) return; // Mute toasts in disguise mode
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
         toast.className = 'toast';
@@ -435,7 +451,7 @@
             if (!isFirstLoad && !knownMessageIds.has(m.id) && !isMe) {
                 showToast(`New message from ${m.username}`);
                 
-                if (document.hidden && "Notification" in window && Notification.permission === "granted" && !document.body.classList.contains('school-mode')) {
+                if (document.hidden && "Notification" in window && Notification.permission === "granted" && !document.body.classList.contains('gmail-mode')) {
                     new Notification(`New message from ${m.username}`, { 
                         body: m.content,
                         icon: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzYzNjZmMSIgZD0iTTIxIDE1YTIgMiAwIDAgMS0yIDJIN2wtNCA0VjVhMiAyIDAgMCAxIDItMmgxNGEyIDIgMCAwIDEgMiAyeiIvPjwvc3ZnPg=='
@@ -489,9 +505,10 @@
         
         const uniqueRooms = getSavedRooms();
         const list = document.getElementById('chat-list');
+        const isGmail = document.body.classList.contains('gmail-mode');
         
-        let publicHtml = `<div class="section-label">Repositories</div>`;
-        let dmHtml = `<div class="section-label" style="margin-top:10px;">Collaborators</div>`;
+        let publicHtml = `<div class="section-label">${isGmail ? 'Mailing Lists' : 'Public Channels'}</div>`;
+        let dmHtml = `<div class="section-label" style="margin-top:10px;">${isGmail ? 'Primary' : 'Direct Messages'}</div>`;
         
         uniqueRooms.forEach(r => {
             if (r.startsWith('global_') || r.includes(myUser)) {
@@ -532,23 +549,45 @@
     }
     
     function toggleTheme() { 
-        document.body.classList.remove('school-mode'); // Turn off school mode if changing standard theme
+        if (document.body.classList.contains('gmail-mode')) {
+            toggleGmailMode(); // Turn off disguise first
+        }
         document.body.classList.toggle('light-mode'); 
     }
 
-    // Toggle Boss Key / School Mode
-    function toggleSchoolMode() {
-        document.body.classList.remove('light-mode'); // Force dark GitHub look
-        document.body.classList.toggle('school-mode');
+    // Toggle Boss Key / Gmail Mode
+    function toggleGmailMode() {
+        document.body.classList.remove('light-mode'); // Clear standard light mode toggle
+        document.body.classList.toggle('gmail-mode');
+        
+        const isGmail = document.body.classList.contains('gmail-mode');
         const btn = document.getElementById('nav-school');
         
-        if (document.body.classList.contains('school-mode')) {
+        if (isGmail) {
             btn.classList.add('active-nav');
-            document.title = "Localhost:3000 - Index.js"; // Change tab title
+            document.title = `Inbox (1) - ${myUser ? myUser : 'user'}@gmail.com - Gmail`;
+            document.getElementById('inbox-title').innerText = 'Inbox';
+            document.getElementById('btn-dm').innerText = 'Compose';
+            document.getElementById('btn-public').innerText = 'New Thread';
+            document.getElementById('btn-public').style.background = '#ffffff';
+            document.getElementById('btn-public').style.color = '#0b57d0';
+            document.getElementById('btn-public').style.border = '1px solid #747775';
+            document.getElementById('target-input').placeholder = 'Search mail...';
+            document.getElementById('msg').placeholder = 'Reply...';
         } else {
             btn.classList.remove('active-nav');
-            document.title = "Vault Chat Pro"; // Restore tab title
+            document.title = "Vault Chat Pro";
+            document.getElementById('inbox-title').innerText = 'Messages';
+            document.getElementById('btn-dm').innerText = 'Start DM';
+            document.getElementById('btn-public').innerText = 'Create Public';
+            document.getElementById('btn-public').style.background = 'linear-gradient(135deg, #a855f7, #ec4899)';
+            document.getElementById('btn-public').style.color = 'white';
+            document.getElementById('btn-public').style.border = 'none';
+            document.getElementById('target-input').placeholder = 'Enter username or topic...';
+            document.getElementById('msg').placeholder = 'Type a message...';
         }
+        
+        loadChatHub(); // Refresh the list labels to match mode
     }
 
     async function logout() { await _supabase.auth.signOut(); location.reload(); }
