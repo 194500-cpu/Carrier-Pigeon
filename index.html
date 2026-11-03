@@ -51,7 +51,6 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
@@ -70,4 +69,362 @@
         .section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); padding: 20px 20px 8px; text-transform: uppercase; letter-spacing: 1px; }
         
         #chat-list { flex: 1; overflow-y: auto; padding: 0 12px 12px; }
-        .chat-card { padding: 12px 14px; border-radius: 12px; cursor: pointer; margin-bottom:
+        .chat-card { padding: 12px 14px; border-radius: 12px; cursor: pointer; margin-bottom: 4px; display: flex; align-items: center; gap: 14px; border: 1px solid transparent; transition: all 0.2s; }
+        .chat-card:hover { background: var(--input); }
+        .active-chat { background: var(--input); border-color: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        
+        .avatar-public { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #a855f7, #ec4899); display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; font-weight: bold; flex-shrink: 0; }
+        .avatar-dm { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #3b82f6); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: bold; text-transform: uppercase; flex-shrink: 0; }
+
+        .view-container { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; height: 100%; position: relative; }
+        .main-header { padding: 0 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; height: 72px; background: rgba(var(--sidebar-rgb), 0.8); backdrop-filter: blur(10px); flex-shrink: 0; z-index: 5; }
+        .main-header h3 { font-size: 18px; font-weight: 600; color: var(--header); margin: 0; }
+        
+        #output { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 16px; height: 0; }
+        
+        .msg { padding: 12px 18px; border-radius: 18px; max-width: 85%; font-size: 15px; line-height: 1.5; position: relative; cursor: pointer; transition: transform 0.1s, opacity 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .msg:active { transform: scale(0.98); opacity: 0.8; }
+        .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 4px; }
+        .msg-other { align-self: flex-start; background: var(--other-msg); color: var(--other-msg-text); border-bottom-left-radius: 4px; }
+        .msg-sender { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block; text-transform: capitalize; }
+        .msg-me .msg-sender { color: rgba(255,255,255,0.7); text-align: right; }
+        .time { font-size: 10px; opacity: 0.6; margin-top: 6px; display: block; text-align: right; }
+
+        .input-area { padding: 20px 30px; background: var(--bg); display: flex; gap: 12px; flex-shrink: 0; border-top: 1px solid var(--border); }
+        input { background: var(--input); border: 1px solid var(--border); color: var(--text); padding: 14px 18px; border-radius: 12px; outline: none; flex: 1; font-size: 15px; transition: border 0.2s, box-shadow 0.2s; font-family: inherit; width: 100%; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
+        input::placeholder { color: var(--text-muted); }
+        
+        button { border: none; padding: 14px 24px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; background: var(--primary); color: white; transition: all 0.2s; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        button:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        button.secondary { background: var(--input); color: var(--text); border: 1px solid var(--border); }
+        button.secondary:hover { background: var(--border); }
+        button.danger { background: transparent; color: #ef4444; border: 1px solid var(--border); }
+        button.danger:hover { background: rgba(239, 68, 68, 0.1); border-color: #ef4444; }
+
+        .action-buttons { display: flex; gap: 8px; margin-top: 12px; }
+        .action-buttons button { flex: 1; padding: 10px; font-size: 12px; border-radius: 8px; }
+
+        #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s; }
+        .auth-card { width: 360px; max-width: 90%; padding: 40px; background: var(--sidebar); border: 1px solid var(--border); border-radius: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .auth-card h2 { margin: 0 0 24px; color: var(--header); font-size: 28px; font-weight: 700; }
+        .auth-card input { width: 100%; margin-bottom: 16px; }
+
+        #settings-view { padding: 40px; max-width: 600px; margin: 0 auto; width: 100%; }
+        #settings-view h2 { margin-top: 0; color: var(--header); font-size: 28px; margin-bottom: 24px; }
+        .settings-card { background: var(--sidebar); padding: 24px; border-radius: 16px; border: 1px solid var(--border); }
+
+        @media (max-width: 768px) {
+            .inbox { width: 250px; }
+            .msg { max-width: 90%; }
+            .input-area { padding: 15px; }
+            .main-header { padding: 0 15px; }
+        }
+        @media (max-width: 500px) {
+            #home-view { flex-direction: column; }
+            .inbox { width: 100%; height: 40%; border-right: none; border-bottom: 1px solid var(--border); }
+            .view-container { height: 60%; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="auth-overlay">
+    <div class="auth-card">
+        <h2>Vault Chat</h2>
+        <input type="text" id="auth-user" placeholder="Username">
+        <input type="password" id="auth-pass" placeholder="Password">
+        <button onclick="handleAuth()" style="width:100%; margin-top: 8px; font-size: 16px;">Sign In</button>
+        <p style="font-size:13px; margin-top:20px; cursor:pointer; color: var(--text-muted); transition: 0.2s;" onclick="toggleAuthMode()">New? Create Account</p>
+    </div>
+</div>
+
+<nav class="rail">
+    <div class="rail-item active-nav" id="nav-home" onclick="navTo('home')">💬</div>
+    <div class="rail-item" id="nav-settings" onclick="navTo('settings')">⚙️</div>
+    <div class="rail-item" style="color:#ef4444; margin-top:auto;" onclick="logout()">🚪</div>
+</nav>
+
+<section id="home-view" style="flex:1; display:flex;">
+    <aside class="inbox">
+        <div class="inbox-header">
+            <h3>Messages</h3>
+            <input type="text" id="target-input" placeholder="Enter username or topic...">
+            <div class="action-buttons">
+                <button onclick="startChat('private')" class="secondary">Start DM</button>
+                <button onclick="startChat('global')" style="background: linear-gradient(135deg, #a855f7, #ec4899); border:none;">Create Public</button>
+            </div>
+        </div>
+        <div id="chat-list"></div>
+    </aside>
+
+    <main class="view-container">
+        <div id="chat-active-ui" style="display:none; flex-direction:column; height:100%;">
+            <header class="main-header">
+                <h3 id="chat-title">---</h3>
+                <button class="danger" style="padding: 8px 16px; font-size: 12px; border-radius: 8px;" onclick="deleteCurrentChat()">Clear History</button>
+            </header>
+            <div id="output"></div>
+            <div class="input-area">
+                <input type="text" id="msg" placeholder="Type a message..." autocomplete="off">
+                <button onclick="sendMsg()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </div>
+        <div id="empty-state" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.4;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <p style="font-size: 16px; font-weight: 500;">Select a conversation</p>
+        </div>
+    </main>
+</section>
+
+<section id="settings-view" style="flex:1; display:none;">
+    <h2>Settings</h2>
+    <div class="settings-card">
+        <p style="margin-top: 0;">Logged in as: <b id="display-user" style="color: var(--primary); font-size: 18px;">---</b></p>
+        <hr style="border: none; border-top: 1px solid var(--border); margin: 24px 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h4 style="margin: 0 0 8px; color: var(--header);">Appearance</h4>
+                <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Switch between light and dark mode</p>
+            </div>
+            <button onclick="toggleTheme()" class="secondary" style="border-radius: 8px;">🌓 Toggle Theme</button>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px;">
+            <div>
+                <h4 style="margin: 0 0 8px; color: var(--header);">Notifications</h4>
+                <p style="margin: 0; font-size: 13px; color: var(--text-muted);">Enable browser push notifications</p>
+            </div>
+            <button onclick="requestNotificationPermission()" class="secondary" style="border-radius: 8px;">🔔 Enable</button>
+        </div>
+    </div>
+</section>
+
+<script>
+    window.onerror = function(msg, url, line) {
+        alert("System Error on line " + line + ": " + msg);
+        return false;
+    };
+
+    let _supabase, myUser = "", activeRoom = "", chatInterval = null, authMode = 'login';
+    let knownMessageIds = new Set();
+    let isFirstLoad = true;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        try {
+            const SUPABASE_URL = 'https://qlfdggzilndvtbyfqbdb.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsZmRnZ3ppbG5kdnRieWZxYmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNDUwOTgsImV4cCI6MjA4NzYyMTA5OH0.XlzFZSAimDc2SxEAwGn18wqEtDF3mqzYe6nW93OzZpU';
+            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            
+            document.getElementById('msg').addEventListener('keydown', e => e.key === 'Enter' && sendMsg());
+            checkUser();
+        } catch(err) {
+            alert("Failed to connect to database: " + err.message);
+        }
+    });
+
+    function requestNotificationPermission() {
+        if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
+    }
+
+    function getSavedRooms() {
+        try { return JSON.parse(localStorage.getItem('vault_rooms_' + myUser)) || []; } 
+        catch (e) { return []; }
+    }
+    
+    function saveRoomLocally(roomId) {
+        let rooms = getSavedRooms();
+        if (!rooms.includes(roomId)) {
+            rooms.push(roomId);
+            localStorage.setItem('vault_rooms_' + myUser, JSON.stringify(rooms));
+        }
+    }
+
+    function removeRoomLocally(roomId) {
+        let rooms = getSavedRooms();
+        rooms = rooms.filter(r => r !== roomId);
+        localStorage.setItem('vault_rooms_' + myUser, JSON.stringify(rooms));
+    }
+
+    function toggleAuthMode() { 
+        authMode = authMode === 'login' ? 'signup' : 'login'; 
+        const btn = document.querySelector('.auth-card button');
+        const toggleText = document.querySelector('.auth-card p');
+        
+        if (authMode === 'signup') {
+            btn.innerText = 'Sign Up';
+            toggleText.innerText = 'Already have an account? Sign In';
+        } else {
+            btn.innerText = 'Sign In';
+            toggleText.innerText = 'New? Create Account';
+        }
+    }
+
+    async function handleAuth() {
+        const u = document.getElementById('auth-user').value.trim();
+        const p = document.getElementById('auth-pass').value;
+        if (!u || !p) return alert("Please enter both username and password.");
+
+        const email = u + '@chat.com';
+        const { error } = await (authMode === 'login' 
+            ? _supabase.auth.signInWithPassword({ email, password: p }) 
+            : _supabase.auth.signUp({ email, password: p }));
+            
+        if (error) {
+            alert(error.message);
+        } else {
+            if (authMode === 'signup') alert("Account created successfully!");
+            checkUser();
+        }
+    }
+
+    async function checkUser() {
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (user) {
+            myUser = user.email.split('@')[0];
+            document.getElementById('auth-overlay').style.opacity = '0';
+            setTimeout(() => document.getElementById('auth-overlay').style.display = 'none', 300);
+            document.getElementById('display-user').innerText = myUser;
+            saveRoomLocally('global_General'); 
+            requestNotificationPermission(); // Ask for notification permission after login
+            loadChatHub();
+        }
+    }
+
+    async function startChat(type) {
+        const target = document.getElementById('target-input').value.trim();
+        if(!target) return;
+        const roomId = type === 'global' ? 'global_' + target : [myUser, target].sort().join('_');
+        saveRoomLocally(roomId);
+        openChat(roomId, target);
+        document.getElementById('target-input').value = '';
+    }
+
+    function openChat(rid, title) {
+        activeRoom = rid;
+        knownMessageIds.clear(); // Reset seen messages when switching rooms
+        isFirstLoad = true;
+        
+        document.getElementById('empty-state').style.display = 'none';
+        document.getElementById('chat-active-ui').style.display = 'flex';
+        document.getElementById('chat-title').innerText = title.replace('global_', '# ');
+        
+        loadMessages();
+        if(chatInterval) clearInterval(chatInterval);
+        chatInterval = setInterval(loadMessages, 3000);
+        loadChatHub(); 
+    }
+
+    async function loadMessages() {
+        if(!activeRoom) return;
+        const { data } = await _supabase.from('messages').select('*').eq('room_id', activeRoom).order('created_at', {ascending: true});
+        const out = document.getElementById('output');
+        const isAtBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 50;
+
+        let html = '';
+        (data || []).forEach(m => {
+            const isMe = m.username === myUser;
+            
+            // Notification Trigger Logic
+            if (!isFirstLoad && !knownMessageIds.has(m.id) && !isMe) {
+                if ("Notification" in window && Notification.permission === "granted") {
+                    // Send notification if tab is in the background or they are in another app
+                    if (document.hidden) {
+                        new Notification(`New message from ${m.username}`, { 
+                            body: m.content,
+                            icon: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzYzNjZmMSIgZD0iTTIxIDE1YTIgMiAwIDAgMS0yIDJIN2wtNCA0VjVhMiAyIDAgMCAxIDItMmgxNGEyIDIgMCAwIDEgMiAyeiIvPjwvc3ZnPg=='
+                        });
+                    }
+                }
+            }
+            knownMessageIds.add(m.id);
+
+            if(m.username === 'System') {
+                html += `<div style="text-align:center; font-size:11px; color:var(--text-muted); margin:10px 0;">${m.content}</div>`;
+            } else {
+                html += `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}" ${isMe ? `onclick="deleteMessage('${m.id}')" title="Click to delete"` : ''}>
+                    <span class="msg-sender">${m.username}</span>
+                    ${m.content}
+                    <span class="time">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                </div>`;
+            }
+        });
+        
+        isFirstLoad = false;
+        out.innerHTML = html;
+        if(isAtBottom) out.scrollTop = out.scrollHeight;
+    }
+
+    async function deleteMessage(id) {
+        if(confirm("Delete this message?")) {
+            await _supabase.from('messages').delete().eq('id', id);
+            loadMessages();
+        }
+    }
+
+    async function sendMsg() {
+        const input = document.getElementById('msg');
+        if(!input.value.trim()) return;
+        saveRoomLocally(activeRoom);
+        await _supabase.from('messages').insert([{ content: input.value, username: myUser, room_id: activeRoom }]);
+        input.value = ''; 
+        loadMessages();
+    }
+
+    async function loadChatHub() {
+        const { data } = await _supabase.from('messages').select('room_id').order('created_at', {descending: true});
+        const dbRooms = data?.map(d => d.room_id) || [];
+        const savedRooms = getSavedRooms();
+        const uniqueRooms = [...new Set([...dbRooms, ...savedRooms])];
+        
+        const list = document.getElementById('chat-list');
+        
+        let publicHtml = `<div class="section-label">Public Channels</div>`;
+        let dmHtml = `<div class="section-label" style="margin-top:10px;">Direct Messages</div>`;
+        
+        uniqueRooms.forEach(r => {
+            if (r.startsWith('global_') || r.includes(myUser)) {
+                const isGlobal = r.startsWith('global_');
+                const name = isGlobal ? r.replace('global_', '') : r.split('_').filter(n => n !== myUser)[0] || myUser;
+                const displayName = isGlobal ? `# ${name}` : name;
+                
+                const cardHtml = `
+                    <div class="chat-card ${activeRoom === r ? 'active-chat' : ''}" onclick="openChat('${r}', '${name}')">
+                        <div class="${isGlobal ? 'avatar-public' : 'avatar-dm'}">${isGlobal ? '#' : name.charAt(0)}</div>
+                        <b style="font-size: 14px; font-weight: 600; color: var(--text);">${displayName}</b>
+                    </div>`;
+
+                if (isGlobal) publicHtml += cardHtml;
+                else dmHtml += cardHtml;
+            }
+        });
+        list.innerHTML = publicHtml + dmHtml;
+    }
+
+    function navTo(view) {
+        document.getElementById('home-view').style.display = view === 'home' ? 'flex' : 'none';
+        document.getElementById('settings-view').style.display = view === 'settings' ? 'block' : 'none';
+        document.querySelectorAll('.rail-item').forEach(i => i.classList.remove('active-nav'));
+        document.getElementById('nav-' + (view === 'home' ? 'home' : 'settings')).classList.add('active-nav');
+    }
+
+    async function deleteCurrentChat() { 
+        if(confirm("Clear history and remove this chat from your sidebar?")) { 
+            await _supabase.from('messages').delete().eq('room_id', activeRoom); 
+            removeRoomLocally(activeRoom);
+            activeRoom = "";
+            document.getElementById('chat-active-ui').style.display = 'none';
+            document.getElementById('empty-state').style.display = 'flex';
+            if(chatInterval) clearInterval(chatInterval);
+            loadChatHub(); 
+        } 
+    }
+    
+    function toggleTheme() { document.body.classList.toggle('light-mode'); }
+    async function logout() { await _supabase.auth.signOut(); location.reload(); }
+</script>
+</body>
+</html>
