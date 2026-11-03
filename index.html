@@ -61,9 +61,9 @@
 
         /* --- STANDARD CHAT UI --- */
         .rail { width: 72px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 24px; flex-shrink: 0; z-index: 10; }
-        .rail-item { width: 48px; height: 48px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; opacity: 0.5; color: inherit; transition: all 0.2s ease; }
-        .rail-item:hover { background: var(--input); opacity: 1; transform: translateY(-2px); }
-        .active-nav { background: var(--primary); color: var(--header); opacity: 1; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        .rail-item { width: 48px; height: 48px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: all 0.2s ease; }
+        .rail-item:hover { background: var(--input); color: var(--text); transform: translateY(-2px); }
+        .active-nav { background: var(--primary); color: #ffffff !important; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
 
         .inbox { width: 320px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
         .inbox-header { padding: 24px 20px 16px; }
@@ -95,7 +95,7 @@
         .input-area { padding: 20px 30px; background: var(--bg); display: flex; gap: 12px; flex-shrink: 0; border-top: 1px solid var(--border); }
         input { background: var(--input); border: 1px solid var(--border); color: var(--text); padding: 14px 18px; border-radius: 12px; outline: none; flex: 1; font-size: 15px; width: 100%; }
         
-        button { border: none; padding: 14px 24px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; background: var(--primary); color: white; transition: all 0.2s; }
+        button { border: none; padding: 14px 24px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; background: var(--primary); color: white; transition: all 0.2s; display: flex; align-items: center; gap: 8px; justify-content: center; }
         button:hover { background: var(--primary-hover); }
         button.secondary { background: var(--input); color: var(--text); border: 1px solid var(--border); }
         button.danger { background: transparent; color: #ef4444; border: 1px solid var(--border); }
@@ -113,7 +113,7 @@
         .settings-card { background: var(--sidebar); padding: 24px; border-radius: 16px; border: 1px solid var(--border); }
 
         #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: var(--primary); color: white; padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; transform: translateX(120%); opacity: 0; transition: all 0.4s; }
+        .toast { background: var(--primary); color: white; padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; transform: translateX(120%); opacity: 0; transition: all 0.4s; display: flex; align-items: center; gap: 12px; }
         .toast.show { transform: translateX(0); opacity: 1; }
 
         /* =========================================
@@ -133,24 +133,22 @@
         }
 
         body.gmail-mode #app-container { flex-direction: row; }
-        body.gmail-mode .rail { display: none; } /* Hide emoji sidebar */
+        body.gmail-mode .rail { display: none; }
         
-        /* Gmail Header */
         body.gmail-mode #gmail-topbar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 8px 20px; background: white; border-bottom: 1px solid var(--border);
             height: 64px; flex-shrink: 0;
         }
-        .g-logo { display: flex; align-items: center; gap: 16px; font-size: 22px; color: #5f6368; width: 238px; }
+        .g-logo { display: flex; align-items: center; gap: 16px; color: #5f6368; width: 238px; }
         .g-logo img { height: 40px; }
         .g-search { flex: 1; max-width: 720px; background: #eaf1fb; border-radius: 24px; display: flex; align-items: center; padding: 0 16px; height: 48px; gap: 12px; }
         .g-search input { background: transparent; border: none; font-size: 16px; outline: none; width: 100%; color: #202124; padding: 0; }
-        .g-icons { display: flex; align-items: center; gap: 16px; font-size: 20px; color: #5f6368; }
+        .g-icons { display: flex; align-items: center; gap: 16px; color: #5f6368; }
         .g-profile { width: 32px; height: 32px; background: #8e24aa; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; }
 
-        /* Gmail Sidebar Clutter */
         body.gmail-mode .inbox { width: 256px; background: #f6f8fc; border-right: none; padding-top: 16px; }
-        body.gmail-mode .inbox-header { display: none; } /* Hide real header */
+        body.gmail-mode .inbox-header { display: none; }
         body.gmail-mode #gmail-sidebar-clutter { display: block; padding-right: 16px; }
         
         .g-compose { background: #c2e7ff; color: #001d35; border-radius: 16px; padding: 16px 24px; font-weight: 500; font-size: 14px; display: inline-flex; align-items: center; gap: 12px; margin: 0 0 16px 16px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -163,29 +161,24 @@
         .g-folder.active svg { fill: #041e49; }
         .g-unread { margin-left: auto; font-size: 12px; font-weight: bold; }
 
-        /* Adjust Chat List to look like labels */
         body.gmail-mode .section-label { color: #202124; font-size: 14px; font-weight: 500; text-transform: none; padding: 16px 0 8px 24px; letter-spacing: 0; }
         body.gmail-mode .chat-card { border-radius: 0 16px 16px 0; padding: 6px 12px 6px 24px; gap: 12px; margin: 0 16px 0 0; }
         body.gmail-mode .chat-card:hover { background: #e8eaed; }
         body.gmail-mode .active-chat { background: #d3e3fd; box-shadow: none; border: none; }
-        body.gmail-mode .avatar-public, body.gmail-mode .avatar-dm { display: none; } /* Hide avatars in sidebar */
-        body.gmail-mode .chat-card b::before { content: "🏷️ "; font-size: 12px; opacity: 0.6; margin-right: 8px; }
+        body.gmail-mode .active-chat svg { fill: #041e49 !important; }
+        body.gmail-mode .avatar-public, body.gmail-mode .avatar-dm { display: none; }
 
-        /* Main View Structure */
         body.gmail-mode .view-container { background: white; border-radius: 16px; margin: 0 16px 16px 0; border: 1px solid transparent; }
-        body.gmail-mode .main-header { display: none; } /* Hide standard header */
+        body.gmail-mode .main-header { display: none; }
         
-        /* Fake Gmail Action Toolbar */
         body.gmail-mode #gmail-fake-toolbar { display: flex; align-items: center; padding: 12px 24px; gap: 20px; border-bottom: 1px solid var(--border); background: white; border-radius: 16px 16px 0 0; }
         .g-tool-icon { width: 20px; height: 20px; fill: #5f6368; cursor: pointer; }
         .g-tool-icon:hover { fill: #202124; }
         
-        /* Message Area formatting */
         body.gmail-mode #output { padding: 24px 40px; background: white; border-radius: 16px; }
         body.gmail-mode .g-subject-line { font-size: 22px; font-weight: 400; color: #202124; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
         body.gmail-mode .g-subject-line span { font-size: 12px; background: #e8eaed; padding: 2px 6px; border-radius: 4px; color: #5f6368; }
 
-        /* Individual Email (Message) Styling */
         .g-email-wrapper { margin-bottom: 16px; }
         .g-email-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; position: relative; }
         .g-avatar { width: 40px; height: 40px; border-radius: 50%; background: #00796b; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; flex-shrink: 0; }
@@ -196,7 +189,6 @@
         .g-time-actions { font-size: 12px; color: #5f6368; display: flex; align-items: center; gap: 12px; }
         .g-email-body { padding-left: 52px; font-size: 14px; color: #202124; line-height: 1.5; padding-bottom: 16px; border-bottom: 1px solid #f1f3f4; }
         
-        /* Fake Gmail Reply Box */
         body.gmail-mode .input-area { background: white; border: none; border-top: none; padding: 0 40px 40px 92px; display: block; }
         body.gmail-mode .g-reply-box { border: 1px solid #e0e0e0; border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         body.gmail-mode input { border: none; background: transparent; padding: 16px 20px; border-radius: 0; font-size: 14px; color: #202124; }
@@ -208,7 +200,6 @@
 </head>
 <body>
 
-<!-- GMAIL FAKE TOP BAR -->
 <header id="gmail-topbar">
     <div class="g-logo">
         <svg focusable="false" viewBox="0 0 24 24" style="width:24px; height:24px; fill:#5f6368; cursor:pointer;"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
@@ -220,9 +211,9 @@
         <svg focusable="false" viewBox="0 0 24 24" style="width:20px; height:20px; fill:#5f6368; cursor:pointer;"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"></path></svg>
     </div>
     <div class="g-icons">
-        <span>❓</span>
-        <span>⚙️</span>
-        <span>▦</span>
+        <svg viewBox="0 0 24 24" style="width:24px; height:24px; fill:#5f6368; cursor:pointer;" title="Support"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>
+        <svg viewBox="0 0 24 24" style="width:24px; height:24px; fill:#5f6368; cursor:pointer;" title="Settings"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+        <svg viewBox="0 0 24 24" style="width:24px; height:24px; fill:#5f6368; cursor:pointer;" title="Google Apps"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
         <div class="g-profile" onclick="toggleGmailMode()" title="Exit Boss Key">V</div>
     </div>
 </header>
@@ -238,12 +229,19 @@
 </div>
 
 <div id="app-container">
-    <!-- STANDARD CHAT NAV -->
     <nav class="rail">
-        <div class="rail-item active-nav" id="nav-home" onclick="navTo('home')" title="Messages">💬</div>
-        <div class="rail-item" id="nav-settings" onclick="navTo('settings')" title="Settings">⚙️</div>
-        <div class="rail-item" id="nav-school" onclick="toggleGmailMode()" title="Boss Key" style="margin-top:auto; font-size: 22px;">✉️</div>
-        <div class="rail-item" style="color:#ef4444;" onclick="logout()" title="Logout">🚪</div>
+        <div class="rail-item active-nav" id="nav-home" onclick="navTo('home')" title="Messages">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        </div>
+        <div class="rail-item" id="nav-settings" onclick="navTo('settings')" title="Settings">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </div>
+        <div class="rail-item" id="nav-school" onclick="toggleGmailMode()" title="Boss Key" style="margin-top:auto;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        </div>
+        <div class="rail-item" style="color:#ef4444;" onclick="logout()" title="Logout">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </div>
     </nav>
 
     <section id="home-view" style="flex:1; display:flex;">
@@ -257,7 +255,6 @@
                 </div>
             </div>
             
-            <!-- GMAIL FAKE SIDEBAR FOLDERS -->
             <div id="gmail-sidebar-clutter">
                 <div class="g-compose">
                     <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#041e49" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg>
@@ -287,13 +284,11 @@
         <main class="view-container">
             <div id="chat-active-ui" style="display:none; flex-direction:column; height:100%;">
                 
-                <!-- STANDARD HEADER -->
                 <header class="main-header">
                     <h3 id="chat-title">---</h3>
                     <button class="danger" style="padding: 8px 16px; font-size: 12px; border-radius: 8px;" onclick="deleteCurrentChat()">Clear History</button>
                 </header>
 
-                <!-- GMAIL FAKE TOOLBAR -->
                 <div id="gmail-fake-toolbar">
                     <svg class="g-tool-icon" viewBox="0 0 24 24" onclick="deleteCurrentChat()" title="Back to Inbox"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg>
                     <svg class="g-tool-icon" viewBox="0 0 24 24"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12.14l.81 1H5.12z"></path></svg>
@@ -369,7 +364,8 @@
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
         toast.className = 'toast';
-        toast.innerHTML = `💬 ${message}`;
+        
+        toast.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> ${message}`;
         container.appendChild(toast);
         
         void toast.offsetWidth; 
@@ -476,7 +472,6 @@
             const dateStr = new Date(m.created_at).toLocaleDateString([], {month:'short', day:'numeric'});
 
             if (isGmail) {
-                // Render as Gmail Email Thread item
                 const avatarColor = isMe ? '#8e24aa' : '#00796b';
                 html += `
                 <div class="g-email-wrapper">
@@ -489,15 +484,14 @@
                         </div>
                         <div class="g-time-actions">
                             ${dateStr}, ${timeStr} 
-                            <span style="font-size:16px; cursor:pointer;" title="Star">☆</span>
+                            <svg viewBox="0 0 24 24" style="width:18px; height:18px; fill:#5f6368; cursor:pointer;" title="Star"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
                             <svg viewBox="0 0 24 24" style="width:18px; height:18px; fill:#5f6368; cursor:pointer;"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"></path></svg>
-                            <span style="font-size:16px; cursor:pointer;" onclick="deleteMessage('${m.id}')" title="Delete">⋮</span>
+                            <svg viewBox="0 0 24 24" style="width:18px; height:18px; fill:#5f6368; cursor:pointer;" onclick="deleteMessage('${m.id}')" title="Delete"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
                         </div>
                     </div>
                     <div class="g-email-body">${m.content}</div>
                 </div>`;
             } else {
-                // Render as Standard Chat Bubble
                 if(m.username === 'System') {
                     html += `<div style="text-align:center; font-size:11px; color:var(--text-muted); margin:10px 0;">${m.content}</div>`;
                 } else {
@@ -537,7 +531,7 @@
         const isGmail = document.body.classList.contains('gmail-mode');
         
         let publicHtml = `<div class="section-label">${isGmail ? 'Labels' : 'Public Channels'}</div>`;
-        let dmHtml = `<div class="section-label" style="margin-top:10px;">${isGmail ? 'Direct' : 'Direct Messages'}</div>`;
+        let dmHtml = `<div class="section-label" style="margin-top:10px;">${isGmail ? 'Chat' : 'Direct Messages'}</div>`;
         
         uniqueRooms.forEach(r => {
             if (r.startsWith('global_') || r.includes(myUser)) {
@@ -545,10 +539,19 @@
                 const name = isGlobal ? r.replace('global_', '') : r.split('_').filter(n => n !== myUser)[0] || myUser;
                 const displayName = isGlobal ? (isGmail ? name : `# ${name}`) : name;
                 
+                let iconHtml = '';
+                if (isGmail) {
+                    if (isGlobal) {
+                        iconHtml = `<svg viewBox="0 0 24 24" width="16" height="16" fill="#5f6368" style="margin-right:12px; flex-shrink:0;"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.41l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.41zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>`;
+                    } else {
+                        iconHtml = `<svg viewBox="0 0 24 24" width="16" height="16" fill="#5f6368" style="margin-right:12px; flex-shrink:0;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+                    }
+                }
+                
                 const cardHtml = `
                     <div class="chat-card ${activeRoom === r ? 'active-chat' : ''}" onclick="openChat('${r}', '${name}')">
-                        <div class="${isGlobal ? 'avatar-public' : 'avatar-dm'}">${isGlobal ? '#' : name.charAt(0).toUpperCase()}</div>
-                        <b style="font-size: 14px; font-weight: ${isGmail ? '500' : '600'}; color: var(--text);">${displayName}</b>
+                        ${isGmail ? iconHtml : `<div class="${isGlobal ? 'avatar-public' : 'avatar-dm'}">${isGlobal ? '#' : name.charAt(0).toUpperCase()}</div>`}
+                        <b style="font-size: 14px; font-weight: ${isGmail ? '500' : '600'}; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${displayName}</b>
                     </div>`;
 
                 if (isGlobal) publicHtml += cardHtml;
@@ -588,7 +591,6 @@
         
         const isGmail = document.body.classList.contains('gmail-mode');
         
-        // Input switching
         document.getElementById('msg').style.display = isGmail ? 'none' : 'block';
         document.getElementById('send-btn').style.display = isGmail ? 'none' : 'flex';
         document.getElementById('gmail-reply-container').style.display = isGmail ? 'flex' : 'none';
@@ -596,7 +598,7 @@
         if (isGmail) {
             document.title = `Inbox (1) - ${myUser ? myUser : 'user'}@internal.com - Gmail`;
         } else {
-            document.title = "GMAIL";
+            document.title = "Vault Chat Pro";
         }
         
         if (activeRoom) loadMessages(); 
