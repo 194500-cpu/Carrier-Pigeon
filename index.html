@@ -3,262 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pigeon Messenger Pro</title>
+    <title>Vault Chat Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #3ecf8e; --user-msg: #3b82f6; --bg: #0b0e11; --sidebar: #1c2127; --card: #0d1117; --input: #2d333b; --border: #30363d; --text: #adbac7; --header: #ffffff; }
-        body.light-mode { --bg: #f6f8fa; --sidebar: #ffffff; --card: #f6f8fa; --input: #ffffff; --border: #d0d7de; --text: #24292f; --header: #1f2328; }
+        :root { 
+            --primary: #6366f1; 
+            --primary-hover: #4f46e5;
+            --bg: #0f172a; 
+            --sidebar: #1e293b; 
+            --card: #1e293b; 
+            --input: #334155; 
+            --border: #334155; 
+            --text: #f1f5f9; 
+            --text-muted: #94a3b8;
+            --header: #ffffff; 
+            --user-msg: #6366f1; 
+            --other-msg: #334155;
+            --other-msg-text: #f1f5f9;
+        }
+        
+        body.light-mode { 
+            --bg: #f8fafc; 
+            --sidebar: #ffffff; 
+            --card: #ffffff; 
+            --input: #f1f5f9; 
+            --border: #e2e8f0; 
+            --text: #334155; 
+            --text-muted: #64748b;
+            --header: #0f172a; 
+            --user-msg: #6366f1; 
+            --other-msg: #f1f5f9;
+            --other-msg-text: #0f172a;
+        }
         
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; width: 100vw; overflow: hidden; }
-
-        .rail { width: 80px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 20px; flex-shrink: 0; }
-        .rail-item { width: 55px; height: 55px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; opacity: 0.6; color: inherit; transition: 0.2s; }
-        .rail-item span { font-size: 9px; font-weight: bold; margin-top: 4px; }
-        .rail-item:hover { background: var(--input); opacity: 1; }
-        .active-nav { background: var(--primary); color: #000; opacity: 1; }
-
-        .inbox { width: 300px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
-        .inbox-header { padding: 20px; border-bottom: 1px solid var(--border); }
-        .section-label { font-size: 10px; font-weight: 800; opacity: 0.4; padding: 15px 20px 5px; text-transform: uppercase; }
         
-        #chat-list { flex: 1; overflow-y: auto; padding: 10px; }
-        .chat-card { padding: 12px 15px; border-radius: 10px; cursor: pointer; margin-bottom: 4px; display: flex; align-items: center; gap: 12px; border: 1px solid transparent; }
-        .chat-card:hover { background: var(--input); }
-        .active-chat { background: var(--input); border-color: var(--border); }
-
-        .view-container { flex: 1; display: flex; flex-direction: column; background: var(--card); overflow: hidden; height: 100%; }
-        .main-header { padding: 0 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; height: 65px; background: var(--sidebar); flex-shrink: 0; }
-        
-        #output { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; height: 0; }
-        
-        .msg { padding: 10px 15px; border-radius: 15px; max-width: 70%; font-size: 14px; line-height: 1.4; position: relative; cursor: pointer; transition: 0.1s; }
-        .msg:active { transform: scale(0.98); opacity: 0.8; }
-        .msg-me { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 2px; }
-        .msg-other { align-self: flex-start; background: var(--input); color: var(--header); border-bottom-left-radius: 2px; }
-        .msg-sender { font-size: 10px; font-weight: 700; color: var(--primary); margin-bottom: 3px; display: block; }
-        .time { font-size: 9px; opacity: 0.5; margin-top: 4px; display: block; text-align: right; }
-
-        .input-area { padding: 20px; background: var(--sidebar); border-top: 1px solid var(--border); display: flex; gap: 10px; flex-shrink: 0; }
-        input { background: var(--input); border: 1px solid var(--border); color: var(--header); padding: 12px; border-radius: 8px; outline: none; flex: 1; }
-        button { border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; background: var(--primary); color: #000; }
-
-        #auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; }
-        .auth-card { width: 320px; padding: 30px; background: var(--sidebar); border: 1px solid var(--border); border-radius: 20px; text-align: center; }
-    </style>
-</head>
-<body>
-
-<div id="auth-overlay">
-    <div class="auth-card">
-        <h2>Vault Chat</h2>
-        <input type="text" id="auth-user" placeholder="Username" style="margin-bottom:10px; width:100%;">
-        <input type="password" id="auth-pass" placeholder="Password" style="margin-bottom:20px; width:100%;">
-        <button onclick="handleAuth()" style="width:100%;">Sign In</button>
-        <p style="font-size:11px; margin-top:15px; cursor:pointer; opacity:0.5;" onclick="toggleAuthMode()">New? Create Account</p>
-    </div>
-</div>
-
-<nav class="rail">
-    <div class="rail-item active-nav" id="nav-home" onclick="navTo('home')">💬<span>CHATS</span></div>
-    <div class="rail-item" id="nav-settings" onclick="navTo('settings')">⚙️<span>CONFIG</span></div>
-    <div class="rail-item" style="color:#ff4d4d; margin-top:auto;" onclick="logout()">🚪<span>LOGOUT</span></div>
-</nav>
-
-<section id="home-view" style="flex:1; display:flex;">
-    <aside class="inbox">
-        <div class="inbox-header">
-            <h3 style="margin:0 0 15px;">Inbox</h3>
-            <input type="text" id="target-input" placeholder="User..." style="font-size:12px; margin-bottom:8px; width:100%;">
-            <div style="display:flex; gap:5px;">
-                <button onclick="startChat('private')" style="flex:1; padding:8px; font-size:10px;">+ DM</button>
-                <button onclick="startChat('global')" style="flex:1; padding:8px; font-size:10px; background:#9b59b6; color:#fff;">+ Public</button>
-            </div>
-        </div>
-        <div id="chat-list"></div>
-    </aside>
-
-    <main class="view-container">
-        <div id="chat-active-ui" style="display:none; flex-direction:column; height:100%;">
-            <header class="main-header">
-                <h3 id="chat-title" style="margin:0;">---</h3>
-                <button style="background:none; border:1px solid var(--border); color:var(--text); padding:5px 10px; border-radius:5px; font-size:11px; cursor:pointer;" onclick="deleteCurrentChat()">Clear History</button>
-            </header>
-            <div id="output"></div>
-            <div class="input-area">
-                <input type="text" id="msg" placeholder="Message...">
-                <button onclick="sendMsg()">Send</button>
-            </div>
-        </div>
-        <div id="empty-state" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.2;">
-            <p>Select a conversation</p>
-        </div>
-    </main>
-</section>
-
-<section id="settings-view" style="flex:1; display:none; padding:40px;">
-    <h2>Settings</h2>
-    <p>Logged in as: <b id="display-user">---</b></p>
-    <button onclick="toggleTheme()" style="padding:10px; cursor:pointer;">🌓 Toggle Theme</button>
-</section>
-
-<script>
-    const SUPABASE_URL = 'https://qlfdggzilndvtbyfqbdb.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsZmRnZ3ppbG5kdnRieWZxYmRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNDUwOTgsImV4cCI6MjA4NzYyMTA5OH0.XlzFZSAimDc2SxEAwGn18wqEtDF3mqzYe6nW93OzZpU';
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    let myUser = "", activeRoom = "", chatInterval = null, authMode = 'login';
-
-    function toggleAuthMode() { 
-        authMode = authMode === 'login' ? 'signup' : 'login'; 
-        const btn = document.querySelector('.auth-card button');
-        const toggleText = document.querySelector('.auth-card p');
-        
-        if (authMode === 'signup') {
-            btn.innerText = 'Sign Up';
-            toggleText.innerText = 'Already have an account? Sign In';
-        } else {
-            btn.innerText = 'Sign In';
-            toggleText.innerText = 'New? Create Account';
-        }
-    }
-
-    async function handleAuth() {
-        const u = document.getElementById('auth-user').value.trim();
-        const p = document.getElementById('auth-pass').value;
-        
-        if (!u || !p) return alert("Please enter both username and password.");
-
-        const email = u + '@chat.com';
-        const { data, error } = await (authMode === 'login' 
-            ? _supabase.auth.signInWithPassword({ email: email, password: p }) 
-            : _supabase.auth.signUp({ email: email, password: p }));
-            
-        if (error) {
-            alert(error.message);
-        } else {
-            if (authMode === 'signup') {
-                alert("Account created successfully!");
-            }
-            checkUser();
-        }
-    }
-
-    async function checkUser() {
-        const { data: { user } } = await _supabase.auth.getUser();
-        if (user) {
-            myUser = user.email.split('@')[0];
-            document.getElementById('auth-overlay').style.display = 'none';
-            document.getElementById('display-user').innerText = myUser;
-            loadChatHub();
-        }
-    }
-
-    async function startChat(type) {
-        const target = document.getElementById('target-input').value.trim();
-        if(!target) return;
-        const roomId = type === 'global' ? 'global_' + target : [myUser, target].sort().join('_');
-        await _supabase.from('messages').insert([{ content: 'Channel opened.', username: 'System', room_id: roomId }]);
-        openChat(roomId, target);
-        document.getElementById('target-input').value = '';
-    }
-
-    function openChat(rid, title) {
-        activeRoom = rid;
-        document.getElementById('empty-state').style.display = 'none';
-        document.getElementById('chat-active-ui').style.display = 'flex';
-        document.getElementById('chat-title').innerText = title.replace('global_', '# ');
-        loadMessages();
-        if(chatInterval) clearInterval(chatInterval);
-        chatInterval = setInterval(loadMessages, 3000);
-        loadChatHub();
-    }
-
-    async function loadMessages() {
-        if(!activeRoom) return;
-        const { data } = await _supabase.from('messages').select('*').eq('room_id', activeRoom).order('created_at', {ascending: true});
-        const out = document.getElementById('output');
-        const isAtBottom = out.scrollHeight - out.clientHeight <= out.scrollTop + 50;
-
-        out.innerHTML = (data || []).map(m => {
-            if(m.username === 'System') return `<div style="text-align:center; font-size:11px; opacity:0.3; margin:10px 0;">${m.content}</div>`;
-            const isMe = m.username === myUser;
-            return `<div class="msg ${isMe ? 'msg-me' : 'msg-other'}" ${isMe ? `onclick="deleteMessage('${m.id}')"` : ''}>
-                ${!isMe ? `<span class="msg-sender">${m.username}</span>` : ''}
-                ${m.content}
-                <span class="time">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
-            </div>`;
-        }).join('');
-        if(isAtBottom) out.scrollTop = out.scrollHeight;
-    }
-
-    async function deleteMessage(id) {
-        if(confirm("Delete this message?")) {
-            await _supabase.from('messages').delete().eq('id', id);
-            loadMessages();
-        }
-    }
-
-    async function sendMsg() {
-        const input = document.getElementById('msg');
-        if(!input.value.trim()) return;
-        await _supabase.from('messages').insert([{ content: input.value, username: myUser, room_id: activeRoom }]);
-        input.value = ''; loadMessages();
-    }
-
-    async function loadChatHub() {
-        const { data } = await _supabase.from('messages').select('room_id').order('created_at', {descending: true});
-        const uniqueRooms = [...new Set(data?.map(d => d.room_id) || [])];
-        const list = document.getElementById('chat-list');
-        
-        let html = `<div class="section-label">Public</div>`;
-        
-        if (!uniqueRooms.includes('global_General')) {
-            html += `<div class="chat-card ${activeRoom === 'global_General' ? 'active-chat' : ''}" onclick="openChat('global_General', 'General')">
-                <div style="width:30px; height:30px; border-radius:6px; background:#9b59b6; display:flex; align-items:center; justify-content:center; color:white; font-size:12px;">#</div>
-                <b>General</b>
-            </div>`;
+        body { 
+            font-family: 'Inter', -apple-system, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            display: flex; 
+            height: 100vh; 
+            width: 100vw; 
+            overflow: hidden; 
+            transition: background 0.3s, color 0.3s;
         }
 
-        uniqueRooms.forEach(r => {
-            if (r.startsWith('global_') || r.includes(myUser)) {
-                const isGlobal = r.startsWith('global_');
-                const name = isGlobal ? r.replace('global_', '# ') : r.replace(myUser, '').replace('_','');
-                
-                if (isGlobal) {
-                   html += `<div class="chat-card ${activeRoom === r ? 'active-chat' : ''}" onclick="openChat('${r}', '${name}')">
-                        <div style="width:30px; height:30px; border-radius:6px; background:#9b59b6; display:flex; align-items:center; justify-content:center; color:white; font-size:12px;">#</div>
-                        <b>${name}</b>
-                    </div>`;
-                }
-            }
-        });
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-        html += `<div class="section-label">Direct Messages</div>`;
-        uniqueRooms.forEach(r => {
-            if (!r.startsWith('global_') && r.includes(myUser)) {
-                const name = r.replace(myUser, '').replace('_','');
-                html += `<div class="chat-card ${activeRoom === r ? 'active-chat' : ''}" onclick="openChat('${r}', '${name}')">
-                    <div style="width:30px; height:30px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; color:black; font-size:12px;">${name[0]}</div>
-                    <b>${name}</b>
-                </div>`;
-            }
-        });
+        .rail { width: 72px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 24px; flex-shrink: 0; z-index: 10; }
+        .rail-item { width: 48px; height: 48px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; opacity: 0.5; color: inherit; transition: all 0.2s ease; }
+        .rail-item span { font-size: 9px; font-weight: 700; margin-top: 4px; letter-spacing: 0.5px; }
+        .rail-item:hover { background: var(--input); opacity: 1; transform: translateY(-2px); }
+        .active-nav { background: var(--primary); color: white; opacity: 1; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
+
+        .inbox { width: 320px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+        .inbox-header { padding: 24px 20px 16px; }
+        .inbox-header h3 { margin: 0 0 16px; font-size: 20px; font-weight: 700; color: var(--header); }
         
-        list.innerHTML = html;
-    }
-
-    function navTo(view) {
-        document.getElementById('home-view').style.display = view === 'home' ? 'flex' : 'none';
-        document.getElementById('settings-view').style.display = view === 'settings' ? 'block' : 'none';
-        document.querySelectorAll('.rail-item').forEach(i => i.classList.remove('active-nav'));
-        document.getElementById('nav-' + (view === 'home' ? 'home' : 'settings')).classList.add('active-nav');
-    }
-
-    async function deleteCurrentChat() { if(confirm("Clear history?")) { await _supabase.from('messages').delete().eq('room_id', activeRoom); loadMessages(); } }
-    function toggleTheme() { document.body.classList.toggle('light-mode'); }
-    async function logout() { await _supabase.auth.signOut(); location.reload(); }
-    document.getElementById('msg').addEventListener('keydown', e => e.key === 'Enter' && sendMsg());
-    checkUser();
-</script>
-</body>
-</html>
+        .section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); padding: 20px 20px 8px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        #chat-list { flex: 1; overflow-y: auto; padding: 0 12px 12px; }
+        .chat-card { padding: 12px 14px; border-radius: 12px; cursor: pointer; margin-bottom:
